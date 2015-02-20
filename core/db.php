@@ -12,6 +12,8 @@ class db {
 			if(!class_exists($drvclass))
 				throw new Exception("Driver $drvtype is not exist or not enabled");
 			$this->drv = new $drvclass();
+			
+			$this->drv->Connect($dbparams);
 			// scheme
 			$this->scheme = new DBScheme($dbscheme);			
 				 
@@ -26,7 +28,7 @@ class db {
 	// commit database scheme
 	function commit()
 	{
-		
+		$this->scheme->dbcommit();
 	}
 }
 ?>

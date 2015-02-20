@@ -56,5 +56,16 @@ class DBScheme
 	{
 	
 	}
+	// commit all changes in scheme
+	function dbcommit()
+	{
+		
+		foreach($this->_SCHEME as $key => $obj)
+		{
+			
+			$this->_DRV->CommitObject($key,$obj);
+		}
+		
+	}
 }
 ?>
