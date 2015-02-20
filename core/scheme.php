@@ -49,20 +49,44 @@ class DBScheme
 	// Export datascheme to file
 	function export($fname, $mode=DSIE_PHPSERIALIZE)
 	{
-	
+		switch ($mode)
+		{
+			case DSIE_PHPSERIALIZE: 
+					$context = serialize($this->_SCHEME);
+					file_put_contents($fname, $context);
+				break;
+			case DSIE_XML:
+					
+				break;
+			case DSIE_YML:
+					
+				break;
+			
+		}		
 	}
 	// Import datascheme from file
-	function import($fname, $mode=DSIE_PHPSERIALIZE)
+	function import($fname)
 	{
-	
+		
 	}
 	// commit all changes in scheme
 	function dbcommit()
 	{
+		// список таблиц удаляем те, которых нет в схеме
+		$tables = $this->_DRV->TableList();
 		
+		foreach($tables as $tbl)
+		{
+			if(empty($this->_SCHEME[$tbl]))
+			{
+				//var_dump($tbl);
+				$this->_DRV->DeleteTable($tbl);
+			}
+		}
+		// добавляем/изменяем
 		foreach($this->_SCHEME as $key => $obj)
 		{
-			
+							
 			$this->_DRV->CommitObject($key,$obj);
 		}
 		

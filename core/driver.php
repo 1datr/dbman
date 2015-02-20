@@ -14,8 +14,9 @@ abstract class DBDriver {
 	// Select queries
 	abstract function Select($selectdata);
 	// Commit data table
-	abstract function CommitTable($tblname,$TableData);
-	
+	abstract function CommitTable($tblname,$TableData);	
+	// List of table
+	abstract function TableList();
 	// Commit data table
 	function CommitObject($oname,$object)
 	{
