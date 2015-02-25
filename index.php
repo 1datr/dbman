@@ -8,12 +8,18 @@ $mydb = new db($connection);
 $mydb->scheme->add('user',Array(
 		'login'=>'text',
 		'password'=>'text',
-		'name'=>'text',
+		'name'=>Array("Type"=>'text','charset'=>'utf8')
 ));
 $mydb->scheme->add('group',Array(
 		'name'=>'text',
 		//'fld1'=>'varchar',
 		'parent'=>'bigint'
+));
+$mydb->scheme->add('groupmember',Array(
+		'user'=>'bigint',
+		//'fld1'=>'varchar',
+		'group'=>'bigint',
+		'owner'=>'logic'
 ));
 
 $mydb->scheme->export('./db.ser');

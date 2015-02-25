@@ -34,24 +34,48 @@ class DBD_Mysql extends DBDriver
 	// Change table
 	function ChangeTable($tblname,$TableData)
 	{ 
+		// show all columns of table
 		$res = mysql_query("SHOW COLUMNS FROM ".$this->_PREFIX.$tblname,$this->_LINK);
 		$fields = Array();
 		$fildinfo = Array();
+		// walk all columns
 		while($row = mysql_fetch_array($res))
 		{
-			var_dump($row);
-			if(empty($TableData->_FIELDS[$row[0]]))
+			
+			if(empty($TableData->_FIELDS[$row[0]]))	// no this columns in scheme
 			{
 				if($row[0]!='id')
-					mysql_query("ALTER TABLE ".$this->_PREFIX.$tblname." DROP ".$row[0],$this->_LINK);
+					mysql_query("ALTER TABLE `".$this->_PREFIX.$tblname."` DROP ".$row[0],$this->_LINK);
 			}
 			else 
 			{
 				// Watch the difference between field image and the real field 
-				if($row['Type']==$TableData->_FIELDS[$row[0]])
+				$fldinfo = $this->normalized_field($TableData->_FIELDS[$row[0]]);
+			/*	
+			 * ALTER TABLE  `tdb_user` CHANGE  `name`  `name` TEXT CHARACTER SET utf8 COLLATE utf8_estonian_ci NOT NULL ;
+			 * 
+			 * */
+				$str_collate = "";
+				if($fldinfo['charset']!='')
 				{
-					
+					$str_collate = " CHARACTER SET ".$fldinfo['charset']." COLLATE ".$fldinfo['sub_charset']." ";
+				
 				}
+				
+		/*		if(($row['Type']!=$fldinfo['Type'])||($row['Null']!=$fldinfo['Null']))
+				{*/
+				//	$fldinfo = $this->normalized_field($fld);
+					$nullstr = ($fldinfo['Null']=="NO") ? "NOT NULL" : "NULL";
+					if($fldinfo['Default']==NULL)
+						$fldstr = "`".$row[0]."` ".$fldinfo['Type']." $str_collate  ".$nullstr;
+					else
+						$fldstr = "`".$row[0]."` ".$fldinfo['Type']." $str_collate  Default ".$fldinfo['Default']." ".$nullstr;
+					$_sql = "ALTER TABLE  `".$this->_PREFIX.$tblname."` CHANGE  `".$row[0]."`  $fldstr ";
+				//	echo $_sql;
+					mysql_query($_sql);
+			//	}
+				
+				
 			}
 			$fields[]=$row[0];
 			
@@ -65,9 +89,9 @@ class DBD_Mysql extends DBDriver
 			{
 				$fldinfo = $this->normalized_field($fldimage);
 				if($fldinfo['Default']==NULL)
-					$sql = "ALTER TABLE ".$this->_PREFIX.$tblname." ADD `$fldname` ".$fldinfo['Type']." ".$fldinfo['Null'];
+					$sql = "ALTER TABLE `".$this->_PREFIX.$tblname."` ADD `$fldname` ".$fldinfo['Type']." ".$fldinfo['Null'];
 				else
-					$sql = "ALTER TABLE ".$this->_PREFIX.$tblname." ADD `$fldname` ".$fldinfo['Type']." Default ".$fldinfo['Default']." ".$fldinfo['Null'];
+					$sql = "ALTER TABLE `".$this->_PREFIX.$tblname."` ADD `$fldname` ".$fldinfo['Type']." Default ".$fldinfo['Default']." ".$fldinfo['Null'];
 											
 								//var_dump($sql);
 				mysql_query($sql,$this->_LINK);
@@ -99,6 +123,11 @@ class DBD_Mysql extends DBDriver
 		//return $fld_array['type']
 	}
 	
+	function create_binding($bind_data)
+	{
+		
+	}
+	
 	function TableList()
 	{
 		$res = mysql_query("SHOW TABLES",$this->_LINK);
@@ -113,7 +142,10 @@ class DBD_Mysql extends DBDriver
 		$typeinfo = Array();
 		$typeinfo['Type']='INT';	
 		$typeinfo["Default"]=NULL;
-		$typeinfo["Null"]="NOT NULL";
+		$typeinfo["Null"]="NO";
+		$typeinfo["charset"]='';
+		$typeinfo["sub_charset"]='';
+		
 		if(is_string($info))
 		{
 			$typeinfo['Type']=$info;
@@ -123,14 +155,51 @@ class DBD_Mysql extends DBDriver
 		{
 			$typeinfo['Type']=$info['Type'];
 			$typeinfo["Default"]=$info["Default"];
+			$typeinfo["charset"]=$info["charset"];
+			$typeinfo["sub_charset"]=$info["sub_charset"];
 		}
+		
+		$sinonims = Array("string"=>"text","memo"=>"longtext","logic"=>"boolean","logical"=>"boolean");// datatype synonims
+		if(!empty($sinonims[$typeinfo['Type']]))
+			$typeinfo['Type'] = $sinonims[$typeinfo['Type']];
 		// control
 		if($typeinfo['Type']=='varchar')
 			$typeinfo['Type']='varchar(20)';
 		$notdefault = Array('varchar','text');
 		if(in_array($typeinfo['Type'], $notdefault))
 			$typeinfo["Default"]=NULL;
+		// collation
+		if(($typeinfo["charset"]=="utf8") && ($typeinfo["sub_charset"]==""))
+			$typeinfo["sub_charset"]="utf8_general_ci";
 		return $typeinfo;
+	}
+	// query select
+	function q_select($select_params)
+	{
+		
+		
+	}
+	// query delete
+	function q_delete($del_params)
+	{
+	
+	
+	}
+	// query select
+	function q_delete_item($id)
+	{
+	
+	
+	}
+	// query add
+	function q_add($add_data)
+	{
+		
+	}
+	// query update
+	function q_update($upd_data)
+	{
+		
 	}
 	
 	// Commit data table
@@ -150,10 +219,11 @@ class DBD_Mysql extends DBDriver
 			foreach ($TableData->_FIELDS as $name => $fld)
 			{
 				$fldinfo = $this->normalized_field($fld);
+				$nullstr = ($fldinfo['Null']=="NO") ? "Not null" : "Null";
 				if($fldinfo['Default']==NULL)
-					$fldstr = "`$name` ".$fldinfo['Type']." ".$fldinfo['Null'];
+					$fldstr = "`$name` ".$fldinfo['Type']." ".$nullstr;
 				else
-					$fldstr = "`$name` ".$fldinfo['Type']." Default ".$fldinfo['Default']." ".$fldinfo['Null'];
+					$fldstr = "`$name` ".$fldinfo['Type']." Default ".$fldinfo['Default']." ".$nullstr;
 				
 				$sql = $sql."$fldstr,\n";
 			

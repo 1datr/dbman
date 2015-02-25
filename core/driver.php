@@ -17,6 +17,18 @@ abstract class DBDriver {
 	abstract function CommitTable($tblname,$TableData);	
 	// List of table
 	abstract function TableList();
+	// make table binding
+	abstract function create_binding($bind_data);	
+	// query select
+	abstract function q_select($select_params);
+	// query delete
+	abstract function q_delete($del_params);
+	// query select
+	abstract function q_delete_item($id);
+	// query add
+	abstract function q_add($add_data);
+	// query update
+	abstract function q_update($upd_data);
 	// Commit data table
 	function CommitObject($oname,$object)
 	{
