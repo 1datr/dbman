@@ -1,6 +1,7 @@
 <?php 
 
 require_once dirName(__FILE__).'/core/index.php';
+$_DEBUG=FALSE;
 $connection=Array(
 	'host'=>'localhost','user'=>'root','dbname'=>'dbmantest','prefix'=>'tdb_'
 );
@@ -23,6 +24,14 @@ $mydb->scheme->add('groupmember',Array(
 ));
 
 $mydb->scheme->export('./db.ser');
+$mydb->commit();
+
+//var_dump($mydb->scheme->gettable('user'));
+
+$mydb->scheme->gettable('user')->addfield('avatar','text');
+
+//var_dump($mydb->scheme->gettable('user'));
+$_DEBUG=TRUE;
 $mydb->commit();
 //var_dump($mydb);
 ?>

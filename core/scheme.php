@@ -8,6 +8,7 @@ define("DSIE_PHPSERIALIZE",1);
 define("DSIE_XML",2);
 define("DSIE_YML",3);
 
+
 class DBScheme
 {
 	
@@ -90,6 +91,13 @@ class DBScheme
 			$this->_DRV->CommitObject($key,$obj);
 		}
 		
+	}
+	// get the table
+	function gettable($tbl)
+	{ 
+		global $res;
+		$res = &$this->_SCHEME[$tbl];
+		return $res;
 	}
 }
 ?>

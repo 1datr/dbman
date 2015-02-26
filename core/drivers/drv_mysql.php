@@ -73,7 +73,9 @@ class DBD_Mysql extends DBDriver
 					else
 						$fldstr = "`".$row[0]."` ".$fldinfo['Type']." $str_collate  Default ".$fldinfo['Default']." ".$nullstr;
 					$_sql = "ALTER TABLE  `".$this->_PREFIX.$tblname."` CHANGE  `".$row[0]."`  $fldstr ";
-					echo $_sql."\n";
+					global $_DEBUG;
+					if($_DEBUG)
+						echo $_sql."\n";
 					mysql_query($_sql);
 			//	}
 				
@@ -90,12 +92,14 @@ class DBD_Mysql extends DBDriver
 			if(!in_array($fldname, $fields))
 			{
 				$fldinfo = $this->normalized_field($fldimage);
+				$nullstr = ($fldinfo['Null']=="NO") ? "NOT NULL" : "NULL";
 				if($fldinfo['Default']==NULL)
-					$sql = "ALTER TABLE `".$this->_PREFIX.$tblname."` ADD `$fldname` ".$fldinfo['Type']." ".$fldinfo['Null'];
+					$sql = "ALTER TABLE `".$this->_PREFIX.$tblname."` ADD `$fldname` ".$fldinfo['Type']." $nullstr";
 				else
-					$sql = "ALTER TABLE `".$this->_PREFIX.$tblname."` ADD `$fldname` ".$fldinfo['Type']." Default ".$fldinfo['Default']." ".$fldinfo['Null'];
-											
-								//var_dump($sql);
+					$sql = "ALTER TABLE `".$this->_PREFIX.$tblname."` ADD `$fldname` ".$fldinfo['Type']." Default ".$fldinfo['Default']." $nullstr";
+				global $_DEBUG;
+				if($_DEBUG)
+						echo $sql."\n";				//var_dump($sql);
 				mysql_query($sql,$this->_LINK);
 			}
 		}
@@ -128,7 +132,9 @@ class DBD_Mysql extends DBDriver
 	function create_binding($tblname,$field,$bind_data)
 	{
 		$query = "ALTER TABLE `".$this->_PREFIX.$tblname."` ADD FOREIGN KEY ( `$field` ) REFERENCES `".$bind_data['table_to']."` (`".$bind_data['field_to']."`) ON DELETE ".$bind_data['on_delete']." ON UPDATE ".$bind_data['on_update'].";";
-		echo $query;
+		global $_DEBUG;
+		if($_DEBUG)
+			echo $query;
 		mysql_query($query,$this->_LINK);
 	}
 	// List of tavble in database now
@@ -244,7 +250,9 @@ class DBD_Mysql extends DBDriver
 			$sql = $sql."
 	PRIMARY KEY(`id`)
 	)";
-			echo  $sql;
+			global $_DEBUG;
+			if($_DEBUG)
+				echo  $sql;
 			foreach ($TableData->_FIELDS as $name => $fld)
 			{
 				if(!empty($fldinfo['bind']))

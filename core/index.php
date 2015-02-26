@@ -1,5 +1,6 @@
 <?php 
-
+$res =null;
+$_DEBUG=TRUE;
 require_once dirName(__FILE__).'/config.php';
 
 $d = dir(dirName(__FILE__).'/dbso/');
