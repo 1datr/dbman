@@ -26,6 +26,11 @@ class DBD_Mysql extends DBDriver
 		
 		
 	}
+	
+	function CheckField($fld)
+	{
+		return  $fld;
+	}
 	// Create table
 	function CreateTable($TableData)
 	{ 
@@ -50,7 +55,7 @@ class DBD_Mysql extends DBDriver
 			else 
 			{
 				// Watch the difference between field image and the real field 
-				$fldinfo = $this->normalized_field($TableData->_FIELDS[$row[0]]);
+				$fldinfo = $this->CheckField($TableData->_FIELDS[$row[0]]);
 				if(!empty($fldinfo['bind']))
 					$this->create_binding($tblname,$row[0], $fldinfo['bind']);
 			/*	
@@ -91,7 +96,7 @@ class DBD_Mysql extends DBDriver
 			
 			if(!in_array($fldname, $fields))
 			{
-				$fldinfo = $this->normalized_field($fldimage);
+				$fldinfo = $this->CheckField($fldimage);
 				$nullstr = ($fldinfo['Null']=="NO") ? "NOT NULL" : "NULL";
 				if($fldinfo['Default']==NULL)
 					$sql = "ALTER TABLE `".$this->_PREFIX.$tblname."` ADD `$fldname` ".$fldinfo['Type']." $nullstr";
@@ -147,51 +152,7 @@ class DBD_Mysql extends DBDriver
 		return $arr;
 	}
 	// get associative array of normalized fields
-	function normalized_field($info)
-	{
-		$typeinfo = Array();
-		$typeinfo['Type']='INT';	
-		$typeinfo["Default"]=NULL;
-		$typeinfo["Null"]="NO";
-		$typeinfo["charset"]='';
-		$typeinfo["sub_charset"]='';
-		
-		if(is_string($info))
-		{
-			if($info[0]=='#')
-			{
-				$typeinfo['Type']='bigint';
-				$info = substr($info,1);
-				$arr = explode('.', $info);
-			//	var_dump($arr);
-				$typeinfo['bind']=Array('table_to'=>$arr[0],'field_to'=>$arr[1],'on_delete'=>'RESTRICT','on_update'=>'RESTRICT');			
-			}
-			else
-				$typeinfo['Type']=$info;
-			
-		}
-		else 
-		{
-			$typeinfo['Type']=$info['Type'];
-			$typeinfo["Default"]=$info["Default"];
-			$typeinfo["charset"]=$info["charset"];
-			$typeinfo["sub_charset"]=$info["sub_charset"];
-		}
-		
-		$sinonims = Array("string"=>"text","memo"=>"longtext","logic"=>"BOOLEAN","logical"=>"BOOLEAN");// datatype synonims
-		if(!empty($sinonims[$typeinfo['Type']]))
-			$typeinfo['Type'] = $sinonims[$typeinfo['Type']];
-		// control
-		if($typeinfo['Type']=='varchar')
-			$typeinfo['Type']='varchar(20)';
-		$notdefault = Array('varchar','text');
-		if(in_array($typeinfo['Type'], $notdefault))
-			$typeinfo["Default"]=NULL;
-		// collation
-		if(($typeinfo["charset"]=="utf8") && ($typeinfo["sub_charset"]==""))
-			$typeinfo["sub_charset"]="utf8_general_ci";
-		return $typeinfo;
-	}
+	
 	// query select
 	function q_select($select_params)
 	{
@@ -237,7 +198,7 @@ class DBD_Mysql extends DBDriver
 		`id` BIGINT(20) NOT NULL AUTO_INCREMENT,\n";
 			foreach ($TableData->_FIELDS as $name => $fld)
 			{
-				$fldinfo = $this->normalized_field($fld);
+				$fldinfo = $this->CheckField($fld);
 				$nullstr = ($fldinfo['Null']=="NO") ? "Not null" : "Null";
 				if($fldinfo['Default']==NULL)
 					$fldstr = "`$name` ".$fldinfo['Type']." ".$nullstr;

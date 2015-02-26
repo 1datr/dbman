@@ -6,7 +6,7 @@ define("DSOT_VIEW",2);
 // Datascheme export/import mode
 define("DSIE_PHPSERIALIZE",1);
 define("DSIE_XML",2);
-define("DSIE_YML",3);
+define("DSIE_JSON",3);
 
 
 class DBScheme
@@ -50,6 +50,7 @@ class DBScheme
 	// Export datascheme to file
 	function export($fname, $mode=DSIE_PHPSERIALIZE)
 	{
+		$this->normalize();
 		switch ($mode)
 		{
 			case DSIE_PHPSERIALIZE: 
@@ -57,10 +58,13 @@ class DBScheme
 					file_put_contents($fname, $context);
 				break;
 			case DSIE_XML:
-					
+					global $DIR_INC;
+					require_once "$DIR_INC/Serializer.php";
+					$serman = new Serializer();
+					file_put_contents($fname, $serman->SerializeClass($this,get_class($this)));
 				break;
-			case DSIE_YML:
-					
+			case DSIE_JSON:
+					file_put_contents($fname, json_encode($this->_SCHEME));
 				break;
 			
 		}		
@@ -70,9 +74,19 @@ class DBScheme
 	{
 		
 	}
+	
+	function normalize()
+	{
+		foreach ($this->_SCHEME as $tbl => $t)
+		{
+			if(method_exists($t, 'normalize'))
+				$this->_SCHEME[$tbl]->normalize();
+		}
+	}
 	// commit all changes in scheme
 	function dbcommit()
 	{
+		$this->normalize();
 		// список таблиц удаляем те, которых нет в схеме
 		$tables = $this->_DRV->TableList();
 		

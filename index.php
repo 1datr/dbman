@@ -33,5 +33,6 @@ $mydb->scheme->gettable('user')->addfield('avatar','text');
 //var_dump($mydb->scheme->gettable('user'));
 $_DEBUG=TRUE;
 $mydb->commit();
-//var_dump($mydb);
+$mydb->scheme->export('./db.jsd',DSIE_JSON);
+var_dump($mydb);
 ?>
