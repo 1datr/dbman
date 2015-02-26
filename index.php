@@ -16,7 +16,7 @@ $mydb->scheme->add('group',Array(
 		'parent'=>'bigint'
 ));
 $mydb->scheme->add('groupmember',Array(
-		'user'=>'bigint',
+		'user'=>'#user.id',
 		//'fld1'=>'varchar',
 		'group'=>'bigint',
 		'owner'=>'logic'

@@ -18,7 +18,7 @@ abstract class DBDriver {
 	// List of table
 	abstract function TableList();
 	// make table binding
-	abstract function create_binding($bind_data);	
+	abstract function create_binding($tblname,$field,$bind_data);	
 	// query select
 	abstract function q_select($select_params);
 	// query delete
@@ -38,7 +38,7 @@ abstract class DBDriver {
 		{
 			case 'DBSTable':
 				$this->CommitTable($oname,$object);
-				break;
+				break;			
 			case 'DBSView':
 				
 				break;

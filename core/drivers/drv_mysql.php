@@ -51,6 +51,8 @@ class DBD_Mysql extends DBDriver
 			{
 				// Watch the difference between field image and the real field 
 				$fldinfo = $this->normalized_field($TableData->_FIELDS[$row[0]]);
+				if(!empty($fldinfo['bind']))
+					$this->create_binding($tblname,$row[0], $fldinfo['bind']);
 			/*	
 			 * ALTER TABLE  `tdb_user` CHANGE  `name`  `name` TEXT CHARACTER SET utf8 COLLATE utf8_estonian_ci NOT NULL ;
 			 * 
@@ -71,7 +73,7 @@ class DBD_Mysql extends DBDriver
 					else
 						$fldstr = "`".$row[0]."` ".$fldinfo['Type']." $str_collate  Default ".$fldinfo['Default']." ".$nullstr;
 					$_sql = "ALTER TABLE  `".$this->_PREFIX.$tblname."` CHANGE  `".$row[0]."`  $fldstr ";
-				//	echo $_sql;
+					echo $_sql."\n";
 					mysql_query($_sql);
 			//	}
 				
@@ -123,11 +125,13 @@ class DBD_Mysql extends DBDriver
 		//return $fld_array['type']
 	}
 	
-	function create_binding($bind_data)
+	function create_binding($tblname,$field,$bind_data)
 	{
-		
+		$query = "ALTER TABLE `".$this->_PREFIX.$tblname."` ADD FOREIGN KEY ( `$field` ) REFERENCES `".$bind_data['table_to']."` (`".$bind_data['field_to']."`) ON DELETE ".$bind_data['on_delete']." ON UPDATE ".$bind_data['on_update'].";";
+		echo $query;
+		mysql_query($query,$this->_LINK);
 	}
-	
+	// List of tavble in database now
 	function TableList()
 	{
 		$res = mysql_query("SHOW TABLES",$this->_LINK);
@@ -148,7 +152,16 @@ class DBD_Mysql extends DBDriver
 		
 		if(is_string($info))
 		{
-			$typeinfo['Type']=$info;
+			if($info[0]=='#')
+			{
+				$typeinfo['Type']='bigint';
+				$info = substr($info,1);
+				$arr = explode('.', $info);
+			//	var_dump($arr);
+				$typeinfo['bind']=Array('table_to'=>$arr[0],'field_to'=>$arr[1],'on_delete'=>'RESTRICT','on_update'=>'RESTRICT');			
+			}
+			else
+				$typeinfo['Type']=$info;
 			
 		}
 		else 
@@ -159,7 +172,7 @@ class DBD_Mysql extends DBDriver
 			$typeinfo["sub_charset"]=$info["sub_charset"];
 		}
 		
-		$sinonims = Array("string"=>"text","memo"=>"longtext","logic"=>"boolean","logical"=>"boolean");// datatype synonims
+		$sinonims = Array("string"=>"text","memo"=>"longtext","logic"=>"BOOLEAN","logical"=>"BOOLEAN");// datatype synonims
 		if(!empty($sinonims[$typeinfo['Type']]))
 			$typeinfo['Type'] = $sinonims[$typeinfo['Type']];
 		// control
@@ -232,6 +245,11 @@ class DBD_Mysql extends DBDriver
 	PRIMARY KEY(`id`)
 	)";
 			echo  $sql;
+			foreach ($TableData->_FIELDS as $name => $fld)
+			{
+				if(!empty($fldinfo['bind']))
+					$this->create_binding($name, $fldinfo['bind']);
+			}
 			
 			mysql_query($sql,$this->_LINK);
 		}
