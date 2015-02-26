@@ -29,6 +29,8 @@ abstract class DBDriver {
 	abstract function q_add($add_data);
 	// query update
 	abstract function q_update($upd_data);
+	
+	abstract function res_row($res);
 	// Commit data table
 	function CommitObject($oname,$object)
 	{

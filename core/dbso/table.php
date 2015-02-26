@@ -1,4 +1,50 @@
 <?php 
+$resx = NULL;
+class SQLWhereParams{
+	
+	function __construct()
+	{
+		$this->_BUF = Array();
+	}
+	
+	var $_BUF;
+	// =
+	function op($param,$val,$op)
+	{
+		global $resx;
+		
+		$this->_BUF[] = Array('op'=>$op,'op1'=>$param,'op2'=>$val);
+		$resx=&$this;
+		return $resx;
+	}
+	
+	// &&
+	function _and($param,$val)
+	{
+		global $resx;
+		$resx=&$this;
+		$this->_BUF[] = Array('op'=>'AND');
+		return $resx;
+	}
+	// ||
+	function _or($param,$val)
+	{
+		global $resx;
+		$resx=&$this;
+		$this->_BUF[] = Array('op'=>'OR');
+		return $resx;
+	}
+	// !
+	function _not($param,$val)
+	{
+		global $resx;
+		$resx=&$this;
+		$this->_BUF[] = Array('op'=>'NOT');
+		return $resx;
+	}
+	
+}
+
 class DBSTable {
 	
 	VAR $_FIELDS;
@@ -37,6 +83,7 @@ class DBSTable {
 			$this->_FIELDS[$fld] = $this->normalized_field($finfo);
 	}
 	
+	
 	function normalized_field($info)
 	{
 		$typeinfo = Array();
@@ -45,6 +92,7 @@ class DBSTable {
 		$typeinfo["Null"]="NO";
 		$typeinfo["charset"]='';
 		$typeinfo["sub_charset"]='';
+		$typeinfo["defdata"]=Array();
 	
 		if(is_string($info))
 		{
@@ -66,6 +114,7 @@ class DBSTable {
 			$typeinfo["Default"]=$info["Default"];
 			$typeinfo["charset"]=$info["charset"];
 			$typeinfo["sub_charset"]=$info["sub_charset"];
+			$typeinfo["defdata"]=$info['defdata'];
 		}
 	
 		$sinonims = Array("string"=>"text","memo"=>"longtext","logic"=>"BOOLEAN","logical"=>"BOOLEAN");// datatype synonims

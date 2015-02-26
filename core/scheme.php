@@ -93,6 +93,17 @@ class DBScheme
 		}
 	}
 	
+	// select from table
+	function select($selparams)
+	{
+		return $this->_DRV->q_select($selparams);
+	}
+	// get row from result
+	function res_row($res)
+	{
+		return $this->_DRV->res_row($res);
+	}
+	
 	function normalize()
 	{
 		foreach ($this->_SCHEME as $tbl => $t)

@@ -156,8 +156,35 @@ class DBD_Mysql extends DBDriver
 	// query select
 	function q_select($select_params)
 	{
+		$str_select = "*";
+		$str_where=1;
+		$limit="";
 		
+		if(empty($select_params['join']))
+			$str_from = $this->_PREFIX.$select_params['table']; 
+		if(!empty($select_params['page']))
+		{
+			$limit="LIMIT $l1,$page";
+		}
 		
+		if(!empty($select_params['where']))
+		{
+			
+		}
+		
+		$sql = "SELECT $str_select FROM $str_from WHERE $str_where $limit";
+		global $_DEBUG;
+		if($_DEBUG)
+			echo $sql;
+		$res = mysql_query($sql,$this->_LINK);
+		if($res==FALSE)
+			throw new Exception("Bad query result");
+		return $res;
+	}
+	// get row of result
+	function res_row($res)
+	{
+		return mysql_fetch_array($res,MYSQL_ASSOC);
 	}
 	// query delete
 	function q_delete($del_params)
@@ -221,6 +248,12 @@ class DBD_Mysql extends DBDriver
 			}
 			
 			mysql_query($sql,$this->_LINK);
+			
+			//Set the default values
+			foreach ($fldinfo['defdata'] as $d)
+			{
+				
+			}
 		}
 	}
 	

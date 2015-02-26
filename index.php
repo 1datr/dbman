@@ -24,7 +24,7 @@ else
 	$mydb->scheme->add('groupmember',Array(
 			'user'=>'#user.id',
 			//'fld1'=>'varchar',
-			'group'=>'bigint',
+			'group'=>'#group.id',
 			'owner'=>'logic'
 	));
 	
@@ -36,13 +36,13 @@ else
 	$mydb->scheme->export('./db.ser');
 }
 
-
-
-//var_dump($mydb->scheme->gettable('user'));
-
-
-
-//var_dump($mydb->scheme->gettable('user'));
+$res = $mydb->scheme->select(Array(
+	'table'=>'user'
+));
+while($row=$mydb->scheme->res_row($res))
+{
+	var_dump($row);
+}
 
 $mydb->scheme->export('./db.jsd',DSIE_JSON);
 //$mydb->scheme->export('./db.xml',DSIE_XML);
