@@ -60,8 +60,8 @@ class DBScheme
 			case DSIE_XML:
 					global $DIR_INC;
 					require_once "$DIR_INC/Serializer.php";
-					$serman = new Serializer();
-					file_put_contents($fname, $serman->SerializeClass($this,get_class($this)));
+					$serman = new XMLSerializer();
+					file_put_contents($fname, $serman->SerializeClass($this->_SCHEME));
 				break;
 			case DSIE_JSON:
 					file_put_contents($fname, json_encode($this->_SCHEME));
@@ -72,7 +72,25 @@ class DBScheme
 	// Import datascheme from file
 	function import($fname)
 	{
-		
+		$content = file_get_contents($fname);
+		$extension = end(explode('.', $fname));
+		switch($extension)
+		{
+			case 'jsd':
+			case 'js':
+			case 'jso':
+					$this->_SCHEME = json_decode($content);
+				break;
+			case 'xml':
+					global $DIR_INC;
+					require_once "$DIR_INC/Serializer.php";
+					$serman = new XMLSerializer();
+					$this->_SCHEME = xmlrpc_decode($content);
+				break;
+			case 'ser':
+					$this->_SCHEME = unserialize($content);
+				break;
+		}
 	}
 	
 	function normalize()
