@@ -2,12 +2,14 @@
 
 require_once dirName(__FILE__).'/core/index.php';
 $_DEBUG=FALSE;
+$_COMMIT=FALSE;
 require_once dirName(__FILE__).'/config.php';
 $mydb = new db($connection);
 if(file_exists('./db.ser'))
 {
 	$mydb->scheme->import('./db.ser');
-	$mydb->commit();
+	if($_COMMIT)
+		$mydb->commit();
 }
 else
 {
@@ -36,9 +38,14 @@ else
 	$mydb->scheme->export('./db.ser');
 }
 
-$res = $mydb->scheme->select(Array(
-	'table'=>'user'
-));
+/*$res = $mydb->scheme->select('user')->where("login='root'")->exe();
+while($row=$mydb->scheme->res_row($res))
+{
+	var_dump($row);
+}
+*/
+$_DEBUG=TRUE;
+$res = $mydb->scheme->select('groupmember',Array('user','user|name','group','owner'))->exe();
 while($row=$mydb->scheme->res_row($res))
 {
 	var_dump($row);

@@ -160,6 +160,36 @@ class DBD_Mysql extends DBDriver
 		$str_where=1;
 		$limit="";
 		
+		if(!empty($select_params['select']))
+		{
+			if(is_string($select_params['select']))
+				$str_select = $select_params['select'];
+			elseif(is_array($select_params['select']))
+			{
+				$str_select ="";
+				$i=0;
+				foreach($select_params['select'] as $sel => $val)
+				{
+					// field->name
+					$arr = explode('|', $val);					
+					if(count($arr)>1)
+					{
+						
+					}
+					else 
+					{
+						
+						$val = "".$this->_PREFIX.$select_params['table'].".$val";
+						if($i)
+							$str_select = $str_select.",$val";
+						else 
+							$str_select = $str_select."$val";
+						$i++;
+					}
+				}
+			}
+		}
+		
 		if(empty($select_params['join']))
 			$str_from = $this->_PREFIX.$select_params['table']; 
 		if(!empty($select_params['page']))
@@ -167,9 +197,12 @@ class DBD_Mysql extends DBDriver
 			$limit="LIMIT $l1,$page";
 		}
 		
+		
+		// where parmater
 		if(!empty($select_params['where']))
 		{
-			
+			if(is_string($select_params['where']))
+				$str_where = $select_params['where'];
 		}
 		
 		$sql = "SELECT $str_select FROM $str_from WHERE $str_where $limit";

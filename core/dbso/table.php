@@ -1,54 +1,10 @@
 <?php 
 $resx = NULL;
-class SQLWhereParams{
-	
-	function __construct()
-	{
-		$this->_BUF = Array();
-	}
-	
-	var $_BUF;
-	// =
-	function op($param,$val,$op)
-	{
-		global $resx;
-		
-		$this->_BUF[] = Array('op'=>$op,'op1'=>$param,'op2'=>$val);
-		$resx=&$this;
-		return $resx;
-	}
-	
-	// &&
-	function _and($param,$val)
-	{
-		global $resx;
-		$resx=&$this;
-		$this->_BUF[] = Array('op'=>'AND');
-		return $resx;
-	}
-	// ||
-	function _or($param,$val)
-	{
-		global $resx;
-		$resx=&$this;
-		$this->_BUF[] = Array('op'=>'OR');
-		return $resx;
-	}
-	// !
-	function _not($param,$val)
-	{
-		global $resx;
-		$resx=&$this;
-		$this->_BUF[] = Array('op'=>'NOT');
-		return $resx;
-	}
-	
-}
 
 class DBSTable {
-	
+	// Operator for select
 	VAR $_FIELDS;
-	
+			
 	function  __construct($name,$data = NULL)
 	{
 		$this->_FIELDS = $data;

@@ -15,6 +15,53 @@ class DBScheme
 	VAR $_SCHEME = Array();
 	VAR $_DRV = null;
 	
+	VAR $_SELECT_ARGS=Array();
+	VAR $_ADD_ARGS=Array();
+	VAR $_UPD_ARGS=Array();
+	
+	
+	// =
+	function op($param,$val,$op)
+	{
+		global $resx;
+	
+		$this->_BUF[] = Array('op'=>$op,'op1'=>$param,'op2'=>$val);
+		$resx=&$this;
+		return $resx;
+	}
+	// where 
+	function where($where=NULL)
+	{
+		if($where!=NULL)
+			$this->_SELECT_ARGS['where']=$where;
+		return $this;
+	}
+	
+	// &&
+	function _and($param,$val)
+	{
+		global $resx;
+		$resx=&$this;
+		$this->_BUF[] = Array('op'=>'AND');
+		return $resx;
+	}
+	// ||
+	function _or($param,$val)
+	{
+		global $resx;
+		$resx=&$this;
+		$this->_BUF[] = Array('op'=>'OR');
+		return $resx;
+	}
+	// !
+	function _not($param,$val)
+	{
+		global $resx;
+		$resx=&$this;
+		$this->_BUF[] = Array('op'=>'NOT');
+		return $resx;
+	}
+	
 	function setdriver(&$drv)
 	{
 		$this->_DRV = $drv;
@@ -93,11 +140,35 @@ class DBScheme
 		}
 	}
 	
-	// select from table
-	function select($selparams)
+	function exe()
 	{
-		return $this->_DRV->q_select($selparams);
+		switch($this->mode)
+		{
+			case "select" : return $this->_DRV->q_select($this->_SELECT_ARGS);
+			case "update" : return $this->_DRV->q_update($this->_SELECT_ARGS);
+			case "add" : return $this->_DRV->q_add($this->_SELECT_ARGS);
+			case "delete" : return $this->_DRV->q_delete($this->_SELECT_ARGS);
+		}
 	}
+	
+	VAR $mode ="select";
+	// select from table
+	function select($table,$selparams="*")
+	{
+		$this->mode = 'select';
+		$this->_SELECT_ARGS = Array();
+		$this->_SELECT_ARGS['table']=$table;	
+		$this->_SELECT_ARGS['select']=$selparams;
+		return $this;
+	}
+	// joins
+	function join($joinarg)
+	{
+		if(empty($this->_SELECT_ARGS['join']))
+			$this->_SELECT_ARGS['join']=Array();
+		$this->_SELECT_ARGS['join'][]=$joinarg;
+	}
+	
 	// get row from result
 	function res_row($res)
 	{
