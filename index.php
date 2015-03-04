@@ -2,17 +2,16 @@
 
 require_once dirName(__FILE__).'/core/index.php';
 $_DEBUG=FALSE;
-$_COMMIT=FALSE;
 require_once dirName(__FILE__).'/config.php';
 $mydb = new db($connection);
+/*
 if(file_exists('./db.ser'))
 {
 	$mydb->scheme->import('./db.ser');
-	if($_COMMIT)
-		$mydb->commit();
+	$mydb->commit();
 }
 else
-{
+{*/
 	$mydb->scheme->add('user',Array(
 			'login'=>'text',
 			'password'=>'text',
@@ -36,23 +35,19 @@ else
 	//$_DEBUG=TRUE;
 	$mydb->commit();
 	$mydb->scheme->export('./db.ser');
-}
-
-/*$res = $mydb->scheme->select('user')->where("login='root'")->exe();
-while($row=$mydb->scheme->res_row($res))
-{
-	var_dump($row);
-}
+//}
+/*
+$res = $mydb->scheme->select(Array(
+	'table'=>'user'
+));
 */
-$_DEBUG=TRUE;
-$res = $mydb->scheme->select('groupmember',Array('user','user|name','group','owner'))->exe();
+	$_DEBUG=TRUE;
+//  $mydb->scheme->export('./db.jsd',DSIE_JSON);
+//$mydb->scheme->export('./db.xml',DSIE_XML);
+$res = $mydb->scheme->select('groupmember',Array('user|name','group','owner'))->exe();
 while($row=$mydb->scheme->res_row($res))
 {
 	var_dump($row);
 }
-
-$mydb->scheme->export('./db.jsd',DSIE_JSON);
-//$mydb->scheme->export('./db.xml',DSIE_XML);
-
 //var_dump($mydb);
 ?>

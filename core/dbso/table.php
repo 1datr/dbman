@@ -58,7 +58,10 @@ class DBSTable {
 				$info = substr($info,1);
 				$arr = explode('.', $info);
 				//	var_dump($arr);
-				$typeinfo['bind']=Array('table_to'=>$arr[0],'field_to'=>$arr[1],'on_delete'=>'RESTRICT','on_update'=>'RESTRICT');
+				$typeinfo['bind']=Array('table_to'=>$arr[0],
+						'field_to'=>$arr[1],
+						'on_delete'=>'RESTRICT',
+						'on_update'=>'RESTRICT');
 			}
 			else
 				$typeinfo['Type']=$info;
@@ -70,9 +73,15 @@ class DBSTable {
 			$typeinfo["Default"]=$info["Default"];
 			$typeinfo["charset"]=$info["charset"];
 			$typeinfo["sub_charset"]=$info["sub_charset"];
-			$typeinfo["defdata"]=$info['defdata'];
+			if(!empty($info['defdata']))
+				$typeinfo["defdata"]=$info['defdata'];
 		}
-	
+		//echo "BIND > ";// var_dump($info['bind']);
+		if(!empty($info['bind']))
+		{
+			if(empty($typeinfo['bind']))
+				$typeinfo['bind']=$info['bind'];
+		}
 		$sinonims = Array("string"=>"text","memo"=>"longtext","logic"=>"BOOLEAN","logical"=>"BOOLEAN");// datatype synonims
 		if(!empty($sinonims[$typeinfo['Type']]))
 			$typeinfo['Type'] = $sinonims[$typeinfo['Type']];
@@ -85,6 +94,8 @@ class DBSTable {
 		// collation
 		if(($typeinfo["charset"]=="utf8") && ($typeinfo["sub_charset"]==""))
 			$typeinfo["sub_charset"]="utf8_general_ci";
+		
+		//
 		return $typeinfo;
 	}
 }

@@ -159,6 +159,7 @@ class DBScheme
 		$this->_SELECT_ARGS = Array();
 		$this->_SELECT_ARGS['table']=$table;	
 		$this->_SELECT_ARGS['select']=$selparams;
+		$this->_SELECT_ARGS['scheme']=&$this->_SCHEME;
 		return $this;
 	}
 	// joins
@@ -187,7 +188,7 @@ class DBScheme
 	function dbcommit()
 	{
 		$this->normalize();
-		// список таблиц удаляем те, которых нет в схеме
+		// пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ
 		$tables = $this->_DRV->TableList();
 		
 		foreach($tables as $tbl)
@@ -198,7 +199,7 @@ class DBScheme
 				$this->_DRV->DeleteTable($tbl);
 			}
 		}
-		// добавляем/изменяем
+		// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ/пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 		foreach($this->_SCHEME as $key => $obj)
 		{
 							

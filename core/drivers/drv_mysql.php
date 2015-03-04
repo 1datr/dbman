@@ -174,8 +174,28 @@ class DBD_Mysql extends DBDriver
 					$arr = explode('|', $val);					
 					if(count($arr)>1)
 					{
-						
-					}
+						if(empty($select_params['join']))
+							$select_params['join'] =Array();
+						$thetable = $select_params['table'];
+						foreach($arr as $fld)
+						{
+							$_table = $select_params['scheme'][$thetable];
+							//var_dump($_table->_FIELDS[$fld]);
+							if(!empty($_table->_FIELDS[$fld]['bind']))
+							{
+								
+								$select_params['join'][$_table->_FIELDS[$fld]['bind']['table_to']]=Array(
+									'jto'=>$_table->_FIELDS[$fld]['bind']['field_to'],
+									'jfrom'=>$fld,
+									'jtype'=>'inner',
+									);
+								$select_params['select'][]=$this->_PREFIX.$select_params['table'].".$fld";
+								if(empty($_table->_FIELDS[$fld]['bind']))
+									continue;
+								$thetable = $_table->_FIELDS[$fld]['bind'];
+							}
+						}
+					}					
 					else 
 					{
 						
@@ -191,7 +211,25 @@ class DBD_Mysql extends DBDriver
 		}
 		
 		if(empty($select_params['join']))
-			$str_from = $this->_PREFIX.$select_params['table']; 
+			$str_from = $this->_PREFIX.$select_params['table'];
+		else 
+		{
+			// joins
+			/*
+			 jfrom 
+			 table
+			 jto 
+			 */
+			$str_join = "";
+			
+			foreach ($select_params['join'] as $jkey => $jval )
+			{
+				
+				$str_join = $str_join." {$jval['jtype']} join {$this->_PREFIX}$jkey on ".$this->_PREFIX.$select_params['table'].'.'.$jval['jfrom']."=".$this->_PREFIX.$jkey.'.'.$jval['jto']." "; 
+			}
+			
+			$str_from = $this->_PREFIX.$select_params['table'].$str_join;
+		} 
 		if(!empty($select_params['page']))
 		{
 			$limit="LIMIT $l1,$page";
