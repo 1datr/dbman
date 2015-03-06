@@ -156,6 +156,41 @@ class DBD_Mysql extends DBDriver
 	// query select
 	function q_select($select_params)
 	{
+		// select [t1.f1, t2,f2 ...]
+		function make_select_str($selects)
+		{
+			$str_select="";
+			$i=0;
+			foreach ($selects as $selitem)
+			{
+				if($i)
+					$str_select = $str_select.",{$this->_PREFIX}{$selects['table']}.{$selects['fld']}";
+				else
+					$str_select = $str_select."{$this->_PREFIX}{$selects['table']}.{$selects['fld']}";
+				$i++;
+			}
+			return $str_select;
+		}
+		// join  t2 on t1.f1=t2.f2
+		function make_join_str($joins)
+		{
+			$str_join = "";
+				
+			foreach ($joins as $jkey => $jval )
+			{
+			
+				if($jval['jtable']==$jkey)
+					$str_join = $str_join." {$jval['jtype']} join {$this->_PREFIX}$jkey on ".$this->_PREFIX.$select_params['table'].'.'.$jval['jfrom']."=".$this->_PREFIX.$jkey.'.'.$jval['jto']." ";
+				else 
+					$str_join = $str_join." {$jval['jtype']} join {$this->_PREFIX}$jkey as {$this->_PREFIX}{$jval['jtable']} on ".$this->_PREFIX.$select_params['table'].'.'.$jval['jfrom']."=".$this->_PREFIX.$jkey.'.'.$jval['jto']." ";
+					
+			}
+				
+			$str_from = $this->_PREFIX.$select_params['table'].$str_join;
+			return $str_from;
+		}
+		
+		
 		$str_select = "*";
 		$str_where=1;
 		$limit="";
@@ -177,6 +212,7 @@ class DBD_Mysql extends DBDriver
 						if(empty($select_params['join']))
 							$select_params['join'] =Array();
 						$thetable = $select_params['table'];
+						$_thetable = "";
 						foreach($arr as $fld)
 						{
 							$_table = $select_params['scheme'][$thetable];
@@ -194,7 +230,18 @@ class DBD_Mysql extends DBDriver
 									continue;
 								$thetable = $_table->_FIELDS[$fld]['bind'];
 							}
+							if(!empty($_table->_FIELDS[$fld]['bind']['table_to']))
+							{
+								$_thetable = $_table->_FIELDS[$fld]['bind']['table_to'];
+							}
+							
 						}
+						
+						if($str_select!="")
+							$str_select = $str_select.",{$this->_PREFIX}$_thetable.$fld";
+						else 
+							$str_select = "{$this->_PREFIX}$_thetable.$fld";
+						$i++;
 					}					
 					else 
 					{
@@ -206,6 +253,8 @@ class DBD_Mysql extends DBDriver
 							$str_select = $str_select."$val";
 						$i++;
 					}
+					
+					
 				}
 			}
 		}
