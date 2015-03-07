@@ -157,22 +157,22 @@ class DBD_Mysql extends DBDriver
 	function q_select($select_params)
 	{
 		// select [t1.f1, t2,f2 ...]
-		function make_select_str($selects)
+		function make_select_str($selects,$_PREFIX='')
 		{
 			$str_select="";
 			$i=0;
 			foreach ($selects as $selitem)
 			{
 				if($i)
-					$str_select = $str_select.",{$this->_PREFIX}{$selects['table']}.{$selects['fld']}";
+					$str_select = $str_select.",$_PREFIX{$selects['table']}.{$selects['fld']}";
 				else
-					$str_select = $str_select."{$this->_PREFIX}{$selects['table']}.{$selects['fld']}";
+					$str_select = $str_select."$_PREFIX{$selects['table']}.{$selects['fld']}";
 				$i++;
 			}
 			return $str_select;
 		}
 		// join  t2 on t1.f1=t2.f2
-		function make_join_str($joins)
+		function make_join_str($joins,$_PREFIX='')
 		{
 			$str_join = "";
 				
@@ -180,13 +180,13 @@ class DBD_Mysql extends DBDriver
 			{
 			
 				if($jval['jtable']==$jkey)
-					$str_join = $str_join." {$jval['jtype']} join {$this->_PREFIX}$jkey on ".$this->_PREFIX.$select_params['table'].'.'.$jval['jfrom']."=".$this->_PREFIX.$jkey.'.'.$jval['jto']." ";
+					$str_join = $str_join." {$jval['jtype']} join $_PREFIX$jkey on ".$this->_PREFIX.$select_params['table'].'.'.$jval['jfrom']."=".$this->_PREFIX.$jkey.'.'.$jval['jto']." ";
 				else 
-					$str_join = $str_join." {$jval['jtype']} join {$this->_PREFIX}$jkey as {$this->_PREFIX}{$jval['jtable']} on ".$this->_PREFIX.$select_params['table'].'.'.$jval['jfrom']."=".$this->_PREFIX.$jkey.'.'.$jval['jto']." ";
+					$str_join = $str_join." {$jval['jtype']} join $_PREFIX$jkey as {$this->_PREFIX}{$jval['jtable']} on ".$this->_PREFIX.$select_params['table'].'.'.$jval['jfrom']."=".$this->_PREFIX.$jkey.'.'.$jval['jto']." ";
 					
 			}
 				
-			$str_from = $this->_PREFIX.$select_params['table'].$str_join;
+			$str_from = $_PREFIX.$select_params['table'].$str_join;
 			return $str_from;
 		}
 		
@@ -195,6 +195,8 @@ class DBD_Mysql extends DBDriver
 		$str_where=1;
 		$limit="";
 		
+		make_select_str(Array('table'=>'','fld'=>''),$this->_PREFIX);
+		/*
 		if(!empty($select_params['select']))
 		{
 			if(is_string($select_params['select']))
@@ -264,11 +266,7 @@ class DBD_Mysql extends DBDriver
 		else 
 		{
 			// joins
-			/*
-			 jfrom 
-			 table
-			 jto 
-			 */
+			
 			$str_join = "";
 			
 			foreach ($select_params['join'] as $jkey => $jval )
@@ -293,13 +291,19 @@ class DBD_Mysql extends DBDriver
 		}
 		
 		$sql = "SELECT $str_select FROM $str_from WHERE $str_where $limit";
+		*/
 		global $_DEBUG;
 		if($_DEBUG)
 			echo $sql;
-		$res = mysql_query($sql,$this->_LINK);
+		$res = $this->exe_query($sql);
 		if($res==FALSE)
 			throw new Exception("Bad query result");
 		return $res;
+	}
+	
+	function exe_query($q)
+	{
+		return mysql_query($sql,$this->_LINK);
 	}
 	// get row of result
 	function res_row($res)
