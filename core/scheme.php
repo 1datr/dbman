@@ -139,16 +139,68 @@ class DBScheme
 				break;
 		}
 	}
-	
-	function exe()
+	// saved query exists
+	function qexists($qid)
 	{
-		switch($this->mode)
+		global $QCACHE_DIR;
+		return file_exists($QCACHE_DIR.'/'.$qid);			
+	}
+	
+	function preprocess_select()
+	{
+		
+	}
+	
+	function preprocess_update()
+	{
+	
+	}
+	
+	function preprocess_add()
+	{
+	
+	}
+	
+	function preprocess_delete()
+	{
+	
+	}
+	
+	function exe($qid,$params=NULL)
+	{
+		global $QCACHE_DIR;
+		$filename = "$QCACHE_DIR/$qid";
+		if($this->qexists($qid))	// load saved query if exists
 		{
-			case "select" : return $this->_DRV->q_select($this->_SELECT_ARGS);
-			case "update" : return $this->_DRV->q_update($this->_SELECT_ARGS);
-			case "add" : return $this->_DRV->q_add($this->_SELECT_ARGS);
-			case "delete" : return $this->_DRV->q_delete($this->_SELECT_ARGS);
+			
+			$q = file_get_contents($filename);
+						
 		}
+		else 
+		{
+			switch($this->mode)
+			{
+				case "select" : 
+						$this->_DRV->preprocess_select();
+						$q = $this->_DRV->q_select($this->_SELECT_ARGS);
+					break;
+				case "update" : 
+						$this->_DRV->preprocess_update();
+						$q = $this->_DRV->q_update($this->_SELECT_ARGS);
+					break;
+				case "add" : 
+						$this->_DRV->preprocess_add();
+						$q = $this->_DRV->q_add($this->_SELECT_ARGS);
+					break;
+				case "delete" : 
+						$this->_DRV->preprocess_delete();
+						$q = $this->_DRV->q_delete($this->_SELECT_ARGS);
+					break;
+			}
+			@chmod($QCACHE_DIR, 775);
+			file_put_contents($filename, $q);
+		}
+		return $this->_DRV->exe_query($q);
 	}
 	
 	VAR $mode ="select";
@@ -180,14 +232,16 @@ class DBScheme
 	{
 		foreach ($this->_SCHEME as $tbl => $t)
 		{
-			if(method_exists($t, 'normalize'))
+			if(method_exists($this->_SCHEME[$tbl], 'normalize'))
 				$this->_SCHEME[$tbl]->normalize();
 		}
 	}
 	// commit all changes in scheme
 	function dbcommit()
 	{
+	//	var_dump($this->_SCHEME);
 		$this->normalize();
+	//	var_dump($this->_SCHEME);
 		// ������ ������ ������� ��, ������� ��� � �����
 		$tables = $this->_DRV->TableList();
 		
@@ -205,6 +259,8 @@ class DBScheme
 							
 			$this->_DRV->CommitObject($key,$obj);
 		}
+		
+		$this->_DRV->CommitBindings();
 		
 	}
 	// get the table

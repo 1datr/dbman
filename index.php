@@ -20,13 +20,37 @@ else
 	$mydb->scheme->add('group',Array(
 			'name'=>'text',
 			//'fld1'=>'varchar',
-			'parent'=>'bigint'
-	));
+			'parent'=>Array('Type'=>'bigint',
+					"Default"=>0,
+					'bind'=>Array(
+						'table_to'=>'group',
+						'field_to'=>'id',
+					),
+				)
+			));
 	$mydb->scheme->add('groupmember',Array(
 			'user'=>'#user.id',
 			//'fld1'=>'varchar',
 			'group'=>'#group.id',
 			'owner'=>'logic'
+	));
+	$mydb->scheme->add('category',Array(
+			'name'=>'text',
+			'user'=>'#user.id',
+			//'fld1'=>'varchar',
+			'parent'=>Array('Type'=>'bigint',
+					"Default"=>0,
+					'bind'=>Array(
+						'table_to'=>'category',
+						'field_to'=>'id',
+					),
+				)
+	));
+	$mydb->scheme->add('project',Array(
+			'name'=>'text',
+			'user'=>'#user.id',
+			//'fld1'=>'varchar',
+			'date'=>'datetime',			
 	));
 	
 	$mydb->commit();
@@ -44,7 +68,12 @@ $res = $mydb->scheme->select(Array(
 	$_DEBUG=TRUE;
 //  $mydb->scheme->export('./db.jsd',DSIE_JSON);
 //$mydb->scheme->export('./db.xml',DSIE_XML);
-$res = $mydb->scheme->select('groupmember',Array('user|name','group','owner'))->exe();
+$res = $mydb->scheme->select('groupmember',Array(
+		'user|name',
+		'user|login',
+		'user',
+		'group|name',
+		'owner'))->exe('q1');
 while($row=$mydb->scheme->res_row($res))
 {
 	var_dump($row);

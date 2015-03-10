@@ -31,6 +31,8 @@ abstract class DBDriver {
 	abstract function q_update($upd_data);
 	
 	abstract function res_row($res);
+	
+	abstract function CommitBindings();
 	// Commit data table
 	function CommitObject($oname,$object)
 	{

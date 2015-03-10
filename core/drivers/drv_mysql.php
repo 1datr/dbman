@@ -40,7 +40,7 @@ class DBD_Mysql extends DBDriver
 	function ChangeTable($tblname,$TableData)
 	{ 
 		// show all columns of table
-		$res = mysql_query("SHOW COLUMNS FROM ".$this->_PREFIX.$tblname,$this->_LINK);
+		$res = $this->exe_query("SHOW COLUMNS FROM ".$this->_PREFIX.$tblname);
 		$fields = Array();
 		$fildinfo = Array();
 		// walk all columns
@@ -50,14 +50,26 @@ class DBD_Mysql extends DBDriver
 			if(empty($TableData->_FIELDS[$row[0]]))	// no this columns in scheme
 			{
 				if($row[0]!='id')
-					mysql_query("ALTER TABLE `".$this->_PREFIX.$tblname."` DROP ".$row[0],$this->_LINK);
+					$this->exe_query("ALTER TABLE `".$this->_PREFIX.$tblname."` DROP ".$row[0]);
 			}
 			else 
 			{
 				// Watch the difference between field image and the real field 
-				$fldinfo = $this->CheckField($TableData->_FIELDS[$row[0]]);
-				if(!empty($fldinfo['bind']))
-					$this->create_binding($tblname,$row[0], $fldinfo['bind']);
+				$fldinfo = $TableData->_FIELDS[$row[0]];
+				//var_dump($TableData->_FIELDS[$row[0]]);
+				if(!empty($TableData->_FIELDS[$row[0]]['bind']))
+				{
+					//	echo ">>";
+					//var_dump($TableData->_FIELDS);
+					
+					$this->_BINDINGS[]=Array(
+							'tblname'=>$tblname,
+							'field'=>$row[0],
+							'bind_data'=>&$TableData->_FIELDS[$row[0]]['bind'],
+					);
+					
+					
+				}
 			/*	
 			 * ALTER TABLE  `tdb_user` CHANGE  `name`  `name` TEXT CHARACTER SET utf8 COLLATE utf8_estonian_ci NOT NULL ;
 			 * 
@@ -81,7 +93,7 @@ class DBD_Mysql extends DBDriver
 					global $_DEBUG;
 					if($_DEBUG)
 						echo $_sql."\n";
-					mysql_query($_sql);
+					$this->exe_query($_sql);
 			//	}
 				
 				
@@ -105,7 +117,7 @@ class DBD_Mysql extends DBDriver
 				global $_DEBUG;
 				if($_DEBUG)
 						echo $sql."\n";				//var_dump($sql);
-				mysql_query($sql,$this->_LINK);
+				$this->exe_query($sql);
 			}
 		}
 		//var_dump($fields);
@@ -114,7 +126,7 @@ class DBD_Mysql extends DBDriver
 	function DeleteTable($table)
 	{ 
 	
-		mysql_query("DROP TABLE `".$this->_PREFIX.$table."` CASCADE",$this->_LINK);
+		$this->exe_query("DROP TABLE `".$this->_PREFIX.$table."` CASCADE");
 	}
 	
 	// Select queries
@@ -124,7 +136,7 @@ class DBD_Mysql extends DBDriver
 	}
 	
 	function existsTable($table) {
-		$res = mysql_query("SELECT * FROM `".$this->_PREFIX.$table."` LIMIT 1",$this->_LINK);
+		$res = $this->exe_query("SELECT * FROM `".$this->_PREFIX.$table."` LIMIT 1",FALSE);
 		$err_no = mysql_errno();
 		return ($err_no != '1146' && $res = true);
 	}
@@ -136,16 +148,20 @@ class DBD_Mysql extends DBDriver
 	
 	function create_binding($tblname,$field,$bind_data)
 	{
-		$query = "ALTER TABLE `".$this->_PREFIX.$tblname."` ADD FOREIGN KEY ( `$field` ) REFERENCES `".$bind_data['table_to']."` (`".$bind_data['field_to']."`) ON DELETE ".$bind_data['on_delete']." ON UPDATE ".$bind_data['on_update'].";";
+		if(empty($bind_data['on_delete']))
+			$bind_data['on_delete']='CASCADE';
+		if(empty($bind_data['on_update']))
+			$bind_data['on_update']='RESTRICT';
+		$query = "ALTER TABLE `".$this->_PREFIX.$tblname."` ADD FOREIGN KEY ( `$field` ) REFERENCES `".$this->_PREFIX.$tblname."` (`".$bind_data['field_to']."`) ON DELETE ".$bind_data['on_delete']." ON UPDATE ".$bind_data['on_update']."";
 		global $_DEBUG;
 		if($_DEBUG)
 			echo $query;
-		mysql_query($query,$this->_LINK);
+		$this->exe_query($query);
 	}
 	// List of tavble in database now
 	function TableList()
 	{
-		$res = mysql_query("SHOW TABLES",$this->_LINK);
+		$res = $this->exe_query("SHOW TABLES");
 		$arr = Array();
 		while($row = mysql_fetch_array($res))
 			$arr[]= substr($row[0],strlen($this->_PREFIX));
@@ -161,149 +177,167 @@ class DBD_Mysql extends DBDriver
 		{
 			$str_select="";
 			$i=0;
-			foreach ($selects as $selitem)
+			foreach ($selects as $selkey => $selitem)
 			{
 				if($i)
-					$str_select = $str_select.",$_PREFIX{$selects['table']}.{$selects['fld']}";
+					$str_select = $str_select.", $_PREFIX{$selitem['table']}.{$selitem['fld']} as $selkey";
 				else
-					$str_select = $str_select."$_PREFIX{$selects['table']}.{$selects['fld']}";
+					$str_select = $str_select."$_PREFIX{$selitem['table']}.{$selitem['fld']} as $selkey";
 				$i++;
 			}
 			return $str_select;
 		}
 		// join  t2 on t1.f1=t2.f2
-		function make_join_str($joins,$_PREFIX='')
+		function make_join_str($joins,&$select_params,$_PREFIX='')
 		{
 			$str_join = "";
-				
+			$tbl_last = $select_params['table'];
 			foreach ($joins as $jkey => $jval )
 			{
 			
-				if($jval['jtable']==$jkey)
-					$str_join = $str_join." {$jval['jtype']} join $_PREFIX$jkey on ".$this->_PREFIX.$select_params['table'].'.'.$jval['jfrom']."=".$this->_PREFIX.$jkey.'.'.$jval['jto']." ";
+				if($jval['jtable_to']==$jkey)
+					$str_join = $str_join." {$jval['jtype']} join $_PREFIX$jkey on $_PREFIX{$jval['jtable_from']}.{$jval['jfrom']}=".$_PREFIX.$jkey.'.'.$jval['jto']." ";
 				else 
-					$str_join = $str_join." {$jval['jtype']} join $_PREFIX$jkey as {$this->_PREFIX}{$jval['jtable']} on ".$this->_PREFIX.$select_params['table'].'.'.$jval['jfrom']."=".$this->_PREFIX.$jkey.'.'.$jval['jto']." ";
-					
+					$str_join = $str_join." {$jval['jtype']} join $_PREFIX{$jval['jtable_to']} as $_PREFIX$jkey on $_PREFIX{$jval['jtable_from']}.{$jval['jfrom']}=$_PREFIX.$jkey.{$jval['jto']} ";
+				//$tbl_last = $jval['jtable'];
 			}
 				
-			$str_from = $_PREFIX.$select_params['table'].$str_join;
-			return $str_from;
+			//$str_from = $_PREFIX.$select_params['table'].$str_join;
+			return $str_join;
 		}
-		
+		// add field to selects list
+		function addfield($fld,$table,&$ref_selects)
+		{
+			$fld_key = $fld;
+			if(!empty($ref_selects[$fld_key]))
+			{
+				$fld_key = "{$table}_$fld";
+				$j=1;
+				while(!empty($ref_selects[$fld_key]))
+				{
+					$fld_key=$fld_key.$j;
+					$j++;
+				}
+			}
+			$ref_selects[$fld_key]=Array(
+					'table'=>$table,
+					'fld'=>$fld,
+			);
+		}
+		// process autojoin items
+		function process_autojoin($arr,&$select_params,&$ref_selects,&$ref_joins,$null,&$scheme)
+		{
+			$thetable = $select_params['table'];
+			$table_last = $select_params['table'];
+			$_thetable = "";
+			foreach($arr as $fld)
+			{
+				$_table = $scheme[$thetable];
+				//var_dump($_table->_FIELDS[$fld]);
+				if(!empty($_table->_FIELDS[$fld]['bind']))
+				{
+					$thetable = $_table->_FIELDS[$fld]['bind']['table_to'];
+					if($null) $jtype="left"; else $jtype="inner";
+					
+					$newj = Array(
+							'jtype'=>$jtype,
+							'jtable_to'=>$thetable,
+							'jto'=>$_table->_FIELDS[$fld]['bind']['field_to'],
+							'jfrom'=>$fld,
+							'jtable_from'=>$table_last,
+							);
+					if(empty($ref_joins[$thetable]))
+						$ref_joins[$thetable]=$newj;
+					else 
+					{
+						if(($ref_joins['jtable_to']!=$newj['jtable_to'])||($ref_joins['jtype']!=$newj['jtype']))
+						{
+							
+						}
+					}
+					
+					if(empty($_table->_FIELDS[$fld]['bind']))
+						continue;
+					$thetable = $_table->_FIELDS[$fld]['bind'];
+					$table_last = $thetable;
+				}
+				if(!empty($_table->_FIELDS[$fld]['bind']['table_to']))
+				{
+					$_thetable = $_table->_FIELDS[$fld]['bind']['table_to'];
+				}
+					
+			}
+			// add selection
+			addfield($fld,$_thetable,$ref_selects);
+			
+		}
 		
 		$str_select = "*";
 		$str_where=1;
 		$limit="";
 		
-		make_select_str(Array('table'=>'','fld'=>''),$this->_PREFIX);
-		/*
+		$select_items = Array();
+		$joins = Array();
+		
+		if(!empty($select_params['join']))
+		{
+			foreach ($select_params['join'] as $jkey => $j)
+			{
+				$joins[$jkey]=$j;				
+			}
+			
+		}
+		
 		if(!empty($select_params['select']))
 		{
-			if(is_string($select_params['select']))
-				$str_select = $select_params['select'];
-			elseif(is_array($select_params['select']))
+			if(is_array($select_params['select']))
 			{
-				$str_select ="";
-				$i=0;
-				foreach($select_params['select'] as $sel => $val)
+				// select items in array
+				foreach($select_params['select'] as $selitem)
 				{
-					// field->name
-					$arr = explode('|', $val);					
-					if(count($arr)>1)
+					if(is_array($selitem)) // field defined as array
 					{
-						if(empty($select_params['join']))
-							$select_params['join'] =Array();
-						$thetable = $select_params['table'];
-						$_thetable = "";
-						foreach($arr as $fld)
-						{
-							$_table = $select_params['scheme'][$thetable];
-							//var_dump($_table->_FIELDS[$fld]);
-							if(!empty($_table->_FIELDS[$fld]['bind']))
-							{
-								
-								$select_params['join'][$_table->_FIELDS[$fld]['bind']['table_to']]=Array(
-									'jto'=>$_table->_FIELDS[$fld]['bind']['field_to'],
-									'jfrom'=>$fld,
-									'jtype'=>'inner',
-									);
-								$select_params['select'][]=$this->_PREFIX.$select_params['table'].".$fld";
-								if(empty($_table->_FIELDS[$fld]['bind']))
-									continue;
-								$thetable = $_table->_FIELDS[$fld]['bind'];
-							}
-							if(!empty($_table->_FIELDS[$fld]['bind']['table_to']))
-							{
-								$_thetable = $_table->_FIELDS[$fld]['bind']['table_to'];
-							}
-							
-						}
-						
-						if($str_select!="")
-							$str_select = $str_select.",{$this->_PREFIX}$_thetable.$fld";
-						else 
-							$str_select = "{$this->_PREFIX}$_thetable.$fld";
-						$i++;
-					}					
+						process_autojoin($selitem,$select_params,$select_items ,$joins,true, $select_params['scheme']);
+					}
 					else 
 					{
-						
-						$val = "".$this->_PREFIX.$select_params['table'].".$val";
-						if($i)
-							$str_select = $str_select.",$val";
+						$arr = explode('|', $selitem);
+						if(count($arr)>1)
+						{
+							$null = true;
+							if($arr[0][0]=='!')
+							{
+								$arr[0]=substr($arr[0],1);
+								$null=false;
+							}
+							
+							process_autojoin($arr,$select_params,$select_items ,$joins,$null, $select_params['scheme']);
+						}
 						else 
-							$str_select = $str_select."$val";
-						$i++;
+							addfield($selitem,$select_params['table'],$select_items);
 					}
-					
-					
 				}
-			}
-		}
-		
-		if(empty($select_params['join']))
-			$str_from = $this->_PREFIX.$select_params['table'];
-		else 
-		{
-			// joins
-			
-			$str_join = "";
-			
-			foreach ($select_params['join'] as $jkey => $jval )
-			{
 				
-				$str_join = $str_join." {$jval['jtype']} join {$this->_PREFIX}$jkey on ".$this->_PREFIX.$select_params['table'].'.'.$jval['jfrom']."=".$this->_PREFIX.$jkey.'.'.$jval['jto']." "; 
 			}
-			
-			$str_from = $this->_PREFIX.$select_params['table'].$str_join;
-		} 
-		if(!empty($select_params['page']))
-		{
-			$limit="LIMIT $l1,$page";
+			elseif($select_params['select']=='*')
+				$select_items = Array('*');
 		}
+		$sql = "SELECT ".make_select_str($select_items,$this->_PREFIX)." FROM ".$this->_PREFIX.$select_params['table']." ".
+				make_join_str($joins,$select_params,$this->_PREFIX);
 		
-		
-		// where parmater
-		if(!empty($select_params['where']))
-		{
-			if(is_string($select_params['where']))
-				$str_where = $select_params['where'];
-		}
-		
-		$sql = "SELECT $str_select FROM $str_from WHERE $str_where $limit";
-		*/
-		global $_DEBUG;
-		if($_DEBUG)
-			echo $sql;
-		$res = $this->exe_query($sql);
-		if($res==FALSE)
-			throw new Exception("Bad query result");
-		return $res;
+		return $sql;
+
 	}
 	
-	function exe_query($q)
+	function exe_query($q,$exept=true)
 	{
-		return mysql_query($sql,$this->_LINK);
+		$res = mysql_query($q,$this->_LINK);
+		if($exept)
+			{
+			if($res==FALSE)
+				throw new Exception("Bad query result [$q] ");
+			}
+		return $res;
 	}
 	// get row of result
 	function res_row($res)
@@ -325,20 +359,34 @@ class DBD_Mysql extends DBDriver
 	// query add
 	function q_add($add_data)
 	{
-		
+		$sql = "INSERT INTO `{$add_data['table']}` VALUES(";
 	}
 	// query update
 	function q_update($upd_data)
 	{
 		
 	}
+	// Commit all bindings
+	VAR $_BINDINGS = Array();
+	function CommitBindings()
+	{
+		//var_dump($this->_BINDINGS);
+		foreach($this->_BINDINGS as $b)
+		{
+		/*	echo ">>";
+			var_dump($b);*/
+			$this->create_binding($b['tblname'], $b['field'], $b['bind_data']);
+		}
+	}
 	
 	// Commit data table
 	function CommitTable($tblname,$TableData)
 	{
+		//var_dump($TableData);
 		if($this->existsTable($tblname))
 		{
 			// Change table structure
+			
 			$this->ChangeTable($tblname,$TableData);
 		}
 		else 
@@ -365,13 +413,21 @@ class DBD_Mysql extends DBDriver
 			global $_DEBUG;
 			if($_DEBUG)
 				echo  $sql;
+			
+			$this->exe_query($sql);
+			
 			foreach ($TableData->_FIELDS as $name => $fld)
 			{
-				if(!empty($fldinfo['bind']))
-					$this->create_binding($name, $fldinfo['bind']);
+				if(!empty($fld['bind']))
+					$this->_BINDINGS[]=Array(
+							'tblname'=>$tblname, 
+							'field'=>$name, 
+							'bind_data'=>$fld['bind'],
+							);
+					//$this->create_binding($tblname, $name, $fldinfo['bind']);
 			}
 			
-			mysql_query($sql,$this->_LINK);
+			
 			
 			//Set the default values
 			foreach ($fldinfo['defdata'] as $d)

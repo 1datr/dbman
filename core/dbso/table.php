@@ -49,6 +49,7 @@ class DBSTable {
 		$typeinfo["charset"]='';
 		$typeinfo["sub_charset"]='';
 		$typeinfo["defdata"]=Array();
+		//$typeinfo['bind']=NULL;
 	
 		if(is_string($info))
 		{
@@ -79,8 +80,9 @@ class DBSTable {
 		//echo "BIND > ";// var_dump($info['bind']);
 		if(!empty($info['bind']))
 		{
-			if(empty($typeinfo['bind']))
-				$typeinfo['bind']=$info['bind'];
+			if($typeinfo['bind']!=NULL)
+				if(is_array($info['bind']))
+					$typeinfo['bind']=$info['bind'];
 		}
 		$sinonims = Array("string"=>"text","memo"=>"longtext","logic"=>"BOOLEAN","logical"=>"BOOLEAN");// datatype synonims
 		if(!empty($sinonims[$typeinfo['Type']]))
