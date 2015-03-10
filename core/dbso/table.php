@@ -100,5 +100,8 @@ class DBSTable {
 		//
 		return $typeinfo;
 	}
+	
+	
+	
 }
 ?>

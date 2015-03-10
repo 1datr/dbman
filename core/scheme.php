@@ -142,38 +142,73 @@ class DBScheme
 	// saved query exists
 	function qexists($qid)
 	{
+		if($qid==NULL) return false;
 		global $QCACHE_DIR;
 		return file_exists($QCACHE_DIR.'/'.$qid);			
 	}
-	
-	function preprocess_select()
+	// preprocess select query
+	function preprocess_select($args)
 	{
+		global $DIR_INC;
+		$preprc = "sqlpreprocessor";
+		if(!empty($args['prepr'])) $preprc = $args['prepr'];
+	//	echo "$DIR_INC/$preprc.php";
+		require_once "$DIR_INC/$preprc.php";
+		
+		$prepr = new $preprc();
+	//	var_dump($prepr);
+		$prepr->setscheme($this->_SCHEME);
+		$newargs = $prepr->preprocess_select($args);
+		return $newargs; 
+	}
+	
+	function preprocess_update($args)
+	{
+		global $DIR_INC;
+		$preprc = "sqlpreprocessor";
+		if(!empty($args['prepr'])) $preprc = $args['prepr'];
+		require_once "$DIR_INC/$preprc.php";
+		
+		$prepr = new $preprc();;
+		$prepr->scheme = $this->_SCHEME;
+		return  $prepr->preprocess_update($args);
 		
 	}
 	
-	function preprocess_update()
+	function preprocess_add($args)
 	{
-	
-	}
-	
-	function preprocess_add()
-	{
-	
+		global $DIR_INC;
+		$preprc = "sqlpreprocessor";
+		if(!empty($args['prepr'])) $preprc = $args['prepr'];
+		require_once "$DIR_INC/$preprc.php";
+		
+		$prepr = new $preprc();
+		$prepr->scheme = $this->_SCHEME;
+		return  $prepr->preprocess_add($args);
 	}
 	
 	function preprocess_delete()
 	{
-	
+		global $DIR_INC;
+		$preprc = "sqlpreprocessor";
+		if(!empty($args['prepr'])) $preprc = $args['prepr'];
+		require_once "$DIR_INC/$preprc.php";
+		
+		$prepr = new $preprc();
+		$prepr->scheme = $this->_SCHEME;
+		return  $prepr->preprocess_delete($args);
 	}
 	
-	function exe($qid,$params=NULL)
+	function exe($qid=NULL,$params=NULL)
 	{
 		global $QCACHE_DIR;
-		$filename = "$QCACHE_DIR/$qid";
+		$q="";
+		if($qid!=NULL)
+			$filename = "$QCACHE_DIR/$qid";
 		if($this->qexists($qid))	// load saved query if exists
 		{
-			
-			$q = file_get_contents($filename);
+			if($qid!=NULL)
+				$q = file_get_contents($filename);
 						
 		}
 		else 
@@ -181,24 +216,27 @@ class DBScheme
 			switch($this->mode)
 			{
 				case "select" : 
-						$this->_DRV->preprocess_select();
+						$this->_SELECT_ARGS = $this->preprocess_select($this->_SELECT_ARGS);
+						var_dump($this->_SELECT_ARGS);
 						$q = $this->_DRV->q_select($this->_SELECT_ARGS);
 					break;
 				case "update" : 
-						$this->_DRV->preprocess_update();
+						$this->_SELECT_ARGS = $this->preprocess_update($this->_SELECT_ARGS);
 						$q = $this->_DRV->q_update($this->_SELECT_ARGS);
 					break;
 				case "add" : 
-						$this->_DRV->preprocess_add();
+						$this->_SELECT_ARGS = $this->preprocess_add($this->_SELECT_ARGS);
 						$q = $this->_DRV->q_add($this->_SELECT_ARGS);
 					break;
 				case "delete" : 
-						$this->_DRV->preprocess_delete();
+						$this->_SELECT_ARGS = $this->preprocess_delete($this->_SELECT_ARGS);
 						$q = $this->_DRV->q_delete($this->_SELECT_ARGS);
 					break;
 			}
+			
 			@chmod($QCACHE_DIR, 775);
-			file_put_contents($filename, $q);
+			if($qid!=NULL)
+				file_put_contents($filename, $q);
 		}
 		return $this->_DRV->exe_query($q);
 	}
@@ -211,7 +249,7 @@ class DBScheme
 		$this->_SELECT_ARGS = Array();
 		$this->_SELECT_ARGS['table']=$table;	
 		$this->_SELECT_ARGS['select']=$selparams;
-		$this->_SELECT_ARGS['scheme']=&$this->_SCHEME;
+		//$this->_SELECT_ARGS['scheme']=&$this->_SCHEME;
 		return $this;
 	}
 	// joins

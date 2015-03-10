@@ -73,7 +73,7 @@ $res = $mydb->scheme->select('groupmember',Array(
 		'user|login',
 		'user',
 		'group|name',
-		'owner'))->exe('q1');
+		'owner'))->exe(/*'q1'*/);
 while($row=$mydb->scheme->res_row($res))
 {
 	var_dump($row);

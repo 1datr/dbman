@@ -179,6 +179,8 @@ class DBD_Mysql extends DBDriver
 			$i=0;
 			foreach ($selects as $selkey => $selitem)
 			{
+				/*echo ">>\n";
+				var_dump($selitem);*/
 				if($i)
 					$str_select = $str_select.", $_PREFIX{$selitem['table']}.{$selitem['fld']} as $selkey";
 				else
@@ -203,74 +205,10 @@ class DBD_Mysql extends DBDriver
 			}
 				
 			//$str_from = $_PREFIX.$select_params['table'].$str_join;
-			return $str_join;
+			return $str_join; 
 		}
 		// add field to selects list
-		function addfield($fld,$table,&$ref_selects)
-		{
-			$fld_key = $fld;
-			if(!empty($ref_selects[$fld_key]))
-			{
-				$fld_key = "{$table}_$fld";
-				$j=1;
-				while(!empty($ref_selects[$fld_key]))
-				{
-					$fld_key=$fld_key.$j;
-					$j++;
-				}
-			}
-			$ref_selects[$fld_key]=Array(
-					'table'=>$table,
-					'fld'=>$fld,
-			);
-		}
-		// process autojoin items
-		function process_autojoin($arr,&$select_params,&$ref_selects,&$ref_joins,$null,&$scheme)
-		{
-			$thetable = $select_params['table'];
-			$table_last = $select_params['table'];
-			$_thetable = "";
-			foreach($arr as $fld)
-			{
-				$_table = $scheme[$thetable];
-				//var_dump($_table->_FIELDS[$fld]);
-				if(!empty($_table->_FIELDS[$fld]['bind']))
-				{
-					$thetable = $_table->_FIELDS[$fld]['bind']['table_to'];
-					if($null) $jtype="left"; else $jtype="inner";
-					
-					$newj = Array(
-							'jtype'=>$jtype,
-							'jtable_to'=>$thetable,
-							'jto'=>$_table->_FIELDS[$fld]['bind']['field_to'],
-							'jfrom'=>$fld,
-							'jtable_from'=>$table_last,
-							);
-					if(empty($ref_joins[$thetable]))
-						$ref_joins[$thetable]=$newj;
-					else 
-					{
-						if(($ref_joins['jtable_to']!=$newj['jtable_to'])||($ref_joins['jtype']!=$newj['jtype']))
-						{
-							
-						}
-					}
-					
-					if(empty($_table->_FIELDS[$fld]['bind']))
-						continue;
-					$thetable = $_table->_FIELDS[$fld]['bind'];
-					$table_last = $thetable;
-				}
-				if(!empty($_table->_FIELDS[$fld]['bind']['table_to']))
-				{
-					$_thetable = $_table->_FIELDS[$fld]['bind']['table_to'];
-				}
-					
-			}
-			// add selection
-			addfield($fld,$_thetable,$ref_selects);
-			
-		}
+		
 		
 		$str_select = "*";
 		$str_where=1;
@@ -288,43 +226,17 @@ class DBD_Mysql extends DBDriver
 			
 		}
 		
-		if(!empty($select_params['select']))
+		$_limit = "";
+		if(!empty($select_params['limit']))
 		{
-			if(is_array($select_params['select']))
-			{
-				// select items in array
-				foreach($select_params['select'] as $selitem)
-				{
-					if(is_array($selitem)) // field defined as array
-					{
-						process_autojoin($selitem,$select_params,$select_items ,$joins,true, $select_params['scheme']);
-					}
-					else 
-					{
-						$arr = explode('|', $selitem);
-						if(count($arr)>1)
-						{
-							$null = true;
-							if($arr[0][0]=='!')
-							{
-								$arr[0]=substr($arr[0],1);
-								$null=false;
-							}
-							
-							process_autojoin($arr,$select_params,$select_items ,$joins,$null, $select_params['scheme']);
-						}
-						else 
-							addfield($selitem,$select_params['table'],$select_items);
-					}
-				}
-				
-			}
-			elseif($select_params['select']=='*')
-				$select_items = Array('*');
+			$l1 = ($select_params['limit']['page']-1) * $select_params['limit']['size'];
+			$_limit = "$l1,".$select_params['limit']['size'];
 		}
-		$sql = "SELECT ".make_select_str($select_items,$this->_PREFIX)." FROM ".$this->_PREFIX.$select_params['table']." ".
-				make_join_str($joins,$select_params,$this->_PREFIX);
 		
+		
+		$sql = "SELECT ".make_select_str($select_params['select'],$this->_PREFIX)." FROM ".$this->_PREFIX.$select_params['table']." ".
+				make_join_str($select_params['joins'],$select_params,$this->_PREFIX)." WHERE ".$select_params['where']." ".$_limit ;
+		//echo $sql;
 		return $sql;
 
 	}
