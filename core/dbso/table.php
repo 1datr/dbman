@@ -80,7 +80,7 @@ class DBSTable {
 		//echo "BIND > ";// var_dump($info['bind']);
 		if(!empty($info['bind']))
 		{
-			if($typeinfo['bind']!=NULL)
+			if($typeinfo['bind']==NULL)
 				if(is_array($info['bind']))
 					$typeinfo['bind']=$info['bind'];
 		}

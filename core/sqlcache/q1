@@ -1,0 +1,1 @@
+SELECT tdb_user.name as name, tdb_user.login as login, tdb_groupmember.user as user, tdb_group.name as group_name, tdb_groupmember.owner as owner FROM tdb_groupmember  left join tdb_user on tdb_groupmember.user=tdb_user.id  left join tdb_group on tdb_groupmember.group=tdb_group.id 

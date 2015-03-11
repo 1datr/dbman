@@ -197,10 +197,14 @@ class DBD_Mysql extends DBDriver
 			foreach ($joins as $jkey => $jval )
 			{
 			
-				if($jval['jtable_to']==$jkey)
-					$str_join = $str_join." {$jval['jtype']} join $_PREFIX$jkey on $_PREFIX{$jval['jtable_from']}.{$jval['jfrom']}=".$_PREFIX.$jkey.'.'.$jval['jto']." ";
+				if($jval['to']['table']==$jkey)
+					$str_join = $str_join." {$jval['jtype']} join 
+	$_PREFIX$jkey on 
+	$_PREFIX{$jval['from']['table']}.{$jval['from']['field']}=".$_PREFIX.$jkey.'.'.$jval['to']['field']." ";
 				else 
-					$str_join = $str_join." {$jval['jtype']} join $_PREFIX{$jval['jtable_to']} as $_PREFIX$jkey on $_PREFIX{$jval['jtable_from']}.{$jval['jfrom']}=$_PREFIX.$jkey.{$jval['jto']} ";
+					$str_join = $str_join." {$jval['jtype']} join 
+	$_PREFIX{$jval['to']['table']} as $_PREFIX$jkey on 
+	$_PREFIX{$jval['from']['table']}.{$jval['from']['field']}=$_PREFIX.$jkey.{$jval['to']['field']} ";
 				//$tbl_last = $jval['jtable'];
 			}
 				

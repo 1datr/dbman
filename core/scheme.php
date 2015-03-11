@@ -156,9 +156,10 @@ class DBScheme
 		require_once "$DIR_INC/$preprc.php";
 		
 		$prepr = new $preprc();
-	//	var_dump($prepr);
+
 		$prepr->setscheme($this->_SCHEME);
 		$newargs = $prepr->preprocess_select($args);
+	//	var_dump($newargs);
 		return $newargs; 
 	}
 	
