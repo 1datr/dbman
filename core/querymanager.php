@@ -144,8 +144,8 @@ class QMan
 				$q = $this->_DRV->q_delete($this->_DELETE_ARGS);
 				break;
 			case "deleteitem" :
-				$this->_DELITEM_ARGS = $this->preprocess_delete($this->_DELITEM_ARGS);
-				$q = $this->_DRV->q_delete($this->_DELITEM_ARGS);
+				//$this->_DELITEM_ARGS = $this->preprocess_delete($this->_DELITEM_ARGS);
+				$q = $this->_DRV->q_delete_item($this->_DELITEM_ARGS);
 				break;
 		}
 			
@@ -237,7 +237,7 @@ class QMan
 	// delete some data
 	function delete_item($table,$id)
 	{
-		$this->mode = 'delete';
+		$this->mode = 'deleteitem';
 		$this->_DELITEM_ARGS = Array();
 		$this->_DELITEM_ARGS['table']=$table;
 		$this->_DELITEM_ARGS['id']=$id;

@@ -276,7 +276,7 @@ class DBD_Mysql extends DBDriver
 	function q_delete_item($params)
 	{			
 		$sql = "DELETE FROM `{$this->_PREFIX}{$params['table']}` WHERE id=".$params['id'];
-		
+		//echo $sql;
 		return $sql;
 	}
 	// query add
