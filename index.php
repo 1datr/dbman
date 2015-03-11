@@ -91,5 +91,11 @@ while($row=$mydb->scheme->res_row($res))
 	{
 		var_dump($row);
 	}
+	
+	$mydb->scheme->insert('user',Array(
+			Array('login'=>'user1','name'=>'user1'),
+			Array('login'=>'user2','name'=>'user2')
+			)
+	)->exe();
 //var_dump($mydb);
 ?>

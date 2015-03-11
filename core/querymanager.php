@@ -104,6 +104,14 @@ class QMan
 				return  $prepr->preprocess_delete($args);
 	}
 	
+	// saved query exists
+	function qexists($qid)
+	{
+		if($qid==NULL) return false;
+		global $QCACHE_DIR;
+		return file_exists($QCACHE_DIR.'/'.$qid);
+	}
+	
 	function exe($qid=NULL,$params=NULL)
 	{
 		global $QCACHE_DIR;
@@ -122,20 +130,21 @@ class QMan
 		{
 			case "select" :
 				$this->_SELECT_ARGS = $this->preprocess_select($this->_SELECT_ARGS);
-				var_dump($this->_SELECT_ARGS);
+			//	var_dump($this->_SELECT_ARGS);
 				$q = $this->_DRV->q_select($this->_SELECT_ARGS);
 				break;
 			case "update" :
-				$this->_SELECT_ARGS = $this->preprocess_update($this->_SELECT_ARGS);
-				$q = $this->_DRV->q_update($this->_SELECT_ARGS);
+				$this->_UPDATE_ARGS = $this->preprocess_update($this->_UPDATE_ARGS);
+				$q = $this->_DRV->q_update($this->_UPDATE_ARGS);
 				break;
 			case "add" :
-				$this->_SELECT_ARGS = $this->preprocess_add($this->_SELECT_ARGS);
-				$q = $this->_DRV->q_add($this->_SELECT_ARGS);
+				$this->_ADD_ARGS= $this->preprocess_add($this->_ADD_ARGS);
+				$q = $this->_DRV->q_add($this->_ADD_ARGS);
+				var_dump($q);
 				break;
 			case "delete" :
-				$this->_SELECT_ARGS = $this->preprocess_delete($this->_SELECT_ARGS);
-				$q = $this->_DRV->q_delete($this->_SELECT_ARGS);
+				$this->_DELETE_ARGS = $this->preprocess_delete($this->_DELETE_ARGS);
+				$q = $this->_DRV->q_delete($this->_DELETE_ARGS);
 				break;
 		}
 			
@@ -143,7 +152,20 @@ class QMan
 		if($qid!=NULL)
 			file_put_contents($filename, $q);
 		}
+		
+		if($params!=NULL)
+			$q = $this->make_params($q, $params);
 		return $this->_DRV->exe_query($q);
+	}
+	
+	function make_params($sql,$params)
+	{
+		$params2 = Array();
+		foreach($params as $k => $v)
+		{
+			$params2['{'.$k.'}']=$v;
+		}
+		return strtr($sql,$params2);
 	}
 	
 
@@ -157,6 +179,30 @@ class QMan
 		//$this->_SELECT_ARGS['scheme']=&$this->_SCHEME;
 		return $this;
 	}
+	
+	function insert($table,$data)
+	{
+		$this->mode = 'add';
+		$this->_ADD_ARGS = Array();
+		$this->_ADD_ARGS['table']=$table;
+		if(empty($this->_ADD_ARGS['data']))
+			$this->_ADD_ARGS['data']=Array();
+		
+		if(is_array($data[0]))
+		{
+			foreach ($data as $d)
+				$this->_ADD_ARGS['data'][]=$d;
+		}
+		else 
+		{
+			$this->_ADD_ARGS['data'][]=$data;
+		}
+		
+		//$this->_SELECT_ARGS['scheme']=&$this->_SCHEME;
+		return $this;
+		
+	}
+	
 	// joins
 	function join($joinarg)
 	{

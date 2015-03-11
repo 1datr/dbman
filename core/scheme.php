@@ -93,13 +93,7 @@ class DBScheme extends QMan
 				break;
 		}
 	}
-	// saved query exists
-	function qexists($qid)
-	{
-		if($qid==NULL) return false;
-		global $QCACHE_DIR;
-		return file_exists($QCACHE_DIR.'/'.$qid);			
-	}
+	
 	
 	function normalize()
 	{

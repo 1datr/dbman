@@ -98,6 +98,21 @@ class sqlpreprocessor {
 			$args['joins'][$join['to']['table']]=$join;
 		}
 		
+		function preprocess_add(&$_ARGS)
+		{
+			return $_ARGS;
+		}
+		
+		function preprocess_update(&$_ARGS)
+		{
+			return $_ARGS;
+		}
+		
+		function preprocess_delete(&$_ARGS)
+		{
+			return $_ARGS;
+		}
+		
 		VAR $_scheme;
 		// add new join
 		function add_join($join,&$jkey,&$select_params)

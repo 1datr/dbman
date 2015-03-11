@@ -275,7 +275,56 @@ class DBD_Mysql extends DBDriver
 	// query add
 	function q_add($add_data)
 	{
-		$sql = "INSERT INTO `{$add_data['table']}` VALUES(";
+		/*
+		 INSERT INTO  `dbmantest`.`tdb_project` (
+`id` ,
+`name` ,
+`user` ,
+`date`
+)
+VALUES (
+NULL ,  '123',  '1', NOW( )
+), (
+NULL ,  '456',  '1', NOW( )
+); 
+		 
+		 * */
+		
+	//	var_dump($add_data);
+		$sql1 = "INSERT INTO `{$this->_PREFIX}{$add_data['table']}` (";
+		$sql2 = ") VALUES ";
+		$j = 0;
+		foreach($add_data['data'] as $k => $v)
+		{
+			if($j==0)
+				$ins = " (NULL";
+			else 
+				$ins = ", (NULL";
+			$i=0;
+			if($j==0)
+				$fldstr = "`id`";
+			foreach($v as $fld => $val)
+			{
+				if($j==0)
+				{
+					$fldstr = "$fldstr, `$fld`";
+				}
+					
+				if($val[0]=='@')
+					{
+					$val= substr($val,1);
+					$ins .= ", $val";
+					}
+				else
+					$ins .= ", '$val'";
+				$i++;
+			}
+			$ins = "$ins)";
+			$sql2 = "$sql2 $ins";
+			$j++;
+		}
+		
+		return $sql1.$fldstr.$sql2;
 	}
 	// query update
 	function q_update($upd_data)
