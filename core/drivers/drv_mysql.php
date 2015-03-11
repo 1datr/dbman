@@ -323,7 +323,7 @@ class DBD_Mysql extends DBDriver
 	{
 		$sql = "UPDATE {$this->_PREFIX}{$upd_data['table']} SET ";
 		$i = 0;
-		foreach($upd_data as $col => $val)
+		foreach($upd_data['data'] as $col => $val)
 		{
 			if($val[0]=='@')
 			{
@@ -339,7 +339,7 @@ class DBD_Mysql extends DBDriver
 				$sql .= $newelement;
 			$i++;
 		}
-		
+		$sql = $sql." WHERE {$upd_data['where']}";
 		return  $sql;
 	}
 	// Commit all bindings

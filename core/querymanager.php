@@ -4,8 +4,9 @@ class QMan
 	
 	VAR $_SELECT_ARGS=Array();
 	VAR $_ADD_ARGS=Array();
-	VAR $_UPD_ARGS=Array();
+	VAR $_UPDATE_ARGS=Array();
 	VAR $_DELETE_ARGS=Array();
+	VAR $_DELITEM_ARGS=Array();
 	// =
 	function op($param,$val,$op)
 	{
@@ -15,14 +16,6 @@ class QMan
 		$resx=&$this;
 		return $resx;
 	}
-	// where
-	function where($where=NULL)
-	{
-		if($where!=NULL)
-			$this->_SELECT_ARGS['where']=$where;
-		return $this;
-	}
-	
 	// &&
 	function _and($param,$val)
 	{
@@ -92,7 +85,7 @@ class QMan
 	
 	VAR $mode;
 	
-	function preprocess_delete()
+	function preprocess_delete($args)
 	{
 		global $DIR_INC;
 		$preprc = "sqlpreprocessor";
@@ -100,8 +93,8 @@ class QMan
 		require_once "$DIR_INC/$preprc.php";
 		
 		$prepr = new $preprc();
-				$prepr->scheme = $this->_SCHEME;
-				return  $prepr->preprocess_delete($args);
+		$prepr->scheme = $this->_SCHEME;
+		return  $prepr->preprocess_delete($args);
 	}
 	
 	// saved query exists
@@ -135,16 +128,24 @@ class QMan
 				break;
 			case "update" :
 				$this->_UPDATE_ARGS = $this->preprocess_update($this->_UPDATE_ARGS);
+				//   var_dump($this->_UPDATE_ARGS);
 				$q = $this->_DRV->q_update($this->_UPDATE_ARGS);
+				//echo $q;
 				break;
 			case "add" :
-				$this->_ADD_ARGS= $this->preprocess_add($this->_ADD_ARGS);
+				$this->_ADD_ARGS = $this->preprocess_add($this->_ADD_ARGS);
 				$q = $this->_DRV->q_add($this->_ADD_ARGS);
-				var_dump($q);
+				//var_dump($q);
 				break;
 			case "delete" :
+				//var_dump($this->_DELETE_ARGS);
 				$this->_DELETE_ARGS = $this->preprocess_delete($this->_DELETE_ARGS);
+				
 				$q = $this->_DRV->q_delete($this->_DELETE_ARGS);
+				break;
+			case "deleteitem" :
+				$this->_DELITEM_ARGS = $this->preprocess_delete($this->_DELITEM_ARGS);
+				$q = $this->_DRV->q_delete($this->_DELITEM_ARGS);
 				break;
 		}
 			
@@ -204,21 +205,48 @@ class QMan
 	}
 	
 	// insert some data
-	function update($table,$data)
+	function update($table,$data=NULL)
 	{
 		$this->mode = 'update';
 		$this->_UPDATE_ARGS = Array();
 		$this->_UPDATE_ARGS['table']=$table;
 		if(empty($this->_UPDATE_ARGS['data']))
 			$this->_UPDATE_ARGS['data']=Array();
-	
-		foreach ($data as $k => $v)
-			$this->_UPDATE_ARGS['data'][$k]=$v;
+		if($data!=NULL)
+			foreach ($data as $k => $v)
+				$this->_UPDATE_ARGS['data'][$k]=$v;
 		
 	
 		//$this->_SELECT_ARGS['scheme']=&$this->_SCHEME;
 		return $this;	
 	}
+	
+	// delete some data
+	function delete($table)
+	{
+		$this->mode = 'delete';
+		$this->_DELETE_ARGS = Array();
+		$this->_DELETE_ARGS['table']=$table;
+		
+	
+	
+		//$this->_SELECT_ARGS['scheme']=&$this->_SCHEME;
+		return $this;
+	}
+	
+	// delete some data
+	function delete_item($table,$id)
+	{
+		$this->mode = 'delete';
+		$this->_DELITEM_ARGS = Array();
+		$this->_DELITEM_ARGS['table']=$table;
+		$this->_DELITEM_ARGS['id']=$id;
+	
+	
+		//$this->_SELECT_ARGS['scheme']=&$this->_SCHEME;
+		return $this;
+	}
+	
 	
 	function set($fld,$val)
 	{

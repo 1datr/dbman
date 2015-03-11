@@ -12,46 +12,7 @@ if(file_exists('./db.ser'))
 }
 else
 {
-	$mydb->scheme->add('user',Array(
-			'login'=>'text',
-			'password'=>'text',
-			'name'=>Array("Type"=>'text','charset'=>'utf8')
-	));
-	$mydb->scheme->add('group',Array(
-			'name'=>'text',
-			//'fld1'=>'varchar',
-			'parent'=>Array('Type'=>'bigint',
-					"Default"=>0,
-					'bind'=>Array(
-						'table_to'=>'group',
-						'field_to'=>'id',
-					),
-				)
-			));
-	$mydb->scheme->add('groupmember',Array(
-			'user'=>'#user.id',
-			//'fld1'=>'varchar',
-			'group'=>'#group.id',
-			'owner'=>'logic'
-	));
-	$mydb->scheme->add('category',Array(
-			'name'=>'text',
-			'user'=>'#user.id',
-			//'fld1'=>'varchar',
-			'parent'=>Array('Type'=>'bigint',
-					"Default"=>0,
-					'bind'=>Array(
-						'table_to'=>'category',
-						'field_to'=>'id',
-					),
-				)
-	));
-	$mydb->scheme->add('project',Array(
-			'name'=>'text',
-			'user'=>'#user.id',
-			//'fld1'=>'varchar',
-			'date'=>'datetime',			
-	));
+	require dirName(__FILE__).'/dbinit.php';
 	
 	$mydb->commit();
 	$mydb->scheme->gettable('user')->addfield('avatar','text');
@@ -79,6 +40,7 @@ while($row=$mydb->scheme->res_row($res))
 	var_dump($row);
 }
 */
+	/*
 	$res = $mydb->scheme->select('project',Array(
 			'name',
 			'user|login as userlogin',			
@@ -91,12 +53,21 @@ while($row=$mydb->scheme->res_row($res))
 	{
 		var_dump($row);
 	}
-	
+	*/
+	/*
 	$mydb->scheme->insert('user',Array(
 			Array('login'=>'user1','name'=>'user1'),
 			Array('login'=>'user2','name'=>'user2')
 			)
 	)->exe();
 	
+	$mydb->scheme->update('user',Array('password'=>'123456'))->where("password=''")->exe();
+	
+	$mydb->scheme->insert('user',Array(
+			Array('login'=>'user3','name'=>'user3'),
+	)
+	)->exe();
+	*/
+	$mydb->scheme->delete('user')->where("login='user1'")->exe();
 //var_dump($mydb);
 ?>

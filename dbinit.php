@@ -1,0 +1,51 @@
+<?php 
+$mydb->scheme->add('user',Array(
+		'login'=>'text',
+		'password'=>'text',
+		'name'=>Array("Type"=>'text','charset'=>'utf8')
+));
+$mydb->scheme->add('group',Array(
+		'name'=>'text',
+		//'fld1'=>'varchar',
+		'parent'=>Array('Type'=>'bigint',
+				"Default"=>0,
+				'bind'=>Array(
+						'table_to'=>'group',
+						'field_to'=>'id',
+				),
+		)
+));
+$mydb->scheme->add('groupmember',Array(
+		'user'=>'#user.id',
+		//'fld1'=>'varchar',
+		'group'=>'#group.id',
+		'owner'=>'logic'
+));
+$mydb->scheme->add('category',Array(
+		'name'=>'text',
+		'user'=>'#user.id',
+		//'fld1'=>'varchar',
+		'parent'=>Array('Type'=>'bigint',
+				"Default"=>0,
+				'bind'=>Array(
+						'table_to'=>'category',
+						'field_to'=>'id',
+				),
+		)
+));
+$mydb->scheme->add('project',Array(
+		'name'=>'text',
+		'user'=>'#user.id',
+		//'fld1'=>'varchar',
+		'date'=>'datetime',
+));
+
+$mydb->commit();
+
+$mydb->scheme->insert('user',Array(
+		Array('login'=>'root','name'=>'root','password'=>'123456'),
+		Array('login'=>'vasya','name'=>'Vasya','password'=>'vasya'),
+		Array('login'=>'masha','name'=>'Masha','password'=>'masha'),
+)
+)->exe();
+?>
