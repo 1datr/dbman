@@ -43,37 +43,7 @@ class sqlpreprocessor {
 			{
 				
 				$chain = $this->chain_field($selitem,$args['table'],$newargs);
-
 				
-			/*	while (list($key, $val) = each($chain)) 
-				{
-					$this->chain_merge($val,$chains);
-				}
-				*/
-			
-			/*	
-				if(is_array($selitem)) // field defined as array
-				{
-					$this->process_autojoin($selitem,$newargs,true);
-				}
-				else
-				{
-					$arr = explode('|', $selitem);
-						
-					if(count($arr)>1)
-					{
-						$null = true;
-						if($arr[0][0]=='!')
-						{
-							$arr[0]=substr($arr[0],1);
-							$null=false;
-						}
-							
-						$this->process_autojoin($arr,$newargs,$null);
-					}
-					else
-						$this->addfield($selitem,$args['table'],$newargs['select']);
-				}*/
 			}
 			
 			return $newargs;
@@ -103,6 +73,29 @@ class sqlpreprocessor {
 					'table'=>$table,
 					'fld'=>$fld,
 			);
+		}
+		
+		function preprocess_addjoin($join,&$args)
+		{
+			
+			if(empty($args['joins']))
+				$args['joins'] = Array();
+			$found = false;
+			foreach($args['joins'] as $jk => $j)
+			{
+				if( ($j['jtype']==$join['jtype'])&&
+				($j['from']['table']==$join['from']['table'])&&
+				($j['from']['field']==$join['from']['field'])&&
+				($j['to']['table']==$join['to']['table'])&&
+				($j['to']['field']==$join['to']['field']))
+				{
+					$found = true;
+				
+					return;
+				}
+			}
+				
+			$args['joins'][$join['to']['table']]=$join;
 		}
 		
 		VAR $_scheme;
@@ -231,29 +224,30 @@ class sqlpreprocessor {
 							'nullable'=>$nullable,
 							);
 					$chain[] = $z1;
-					$_table = $pieces[2][0];
+					
 					$z2 = Array(
 							'field'=>$pieces[3][0],
-							'table'=>$_table,
+							'table'=>$pieces[2][0],
 							'nullable'=>$nullable,
 					);
 					$chain[] = $z2;
 					
-					/*
+					// Insert new join
+					$table_to = $pieces[2][0];
 					$newj = Array(
 							'jtype'=>$jtype,
 							'from'=>Array(
 									'table'=>$_table,
-									'field'=>$element,
+									'field'=>$pieces[1][0],
 							),
 							'to'=>Array(
-									'table'=>$this->_scheme[$_table]->_FIELDS[$element]['bind']['table_to'],
-									'field'=>$this->_scheme[$_table]->_FIELDS[$element]['bind']['field_to'],
+									'table'=>$table_to,
+								//	'field'=>$this->_scheme[$table_to]->_FIELDS[],
 							),
 					);
-					$this->add_join($newj,$this->_scheme[$_table]->_FIELDS[$element]['bind']['table_to'],$selects);
+					$_table = $pieces[2][0];
+					$this->add_join($newj,$_table,$selects);
 					
-				*/
 					if($i==count($arr)-1) // ending element
 					{
 							

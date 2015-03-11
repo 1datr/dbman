@@ -83,6 +83,7 @@ while($row=$mydb->scheme->res_row($res))
 			'name',
 			'user|login as userlogin',			
 			'user|name as username',
+			//'user|id<groupmember:group',
 			))->exe(
 					//'q1'
 			);
