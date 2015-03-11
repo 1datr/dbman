@@ -179,7 +179,7 @@ class QMan
 		//$this->_SELECT_ARGS['scheme']=&$this->_SCHEME;
 		return $this;
 	}
-	
+	// insert some data
 	function insert($table,$data)
 	{
 		$this->mode = 'add';
@@ -201,6 +201,51 @@ class QMan
 		//$this->_SELECT_ARGS['scheme']=&$this->_SCHEME;
 		return $this;
 		
+	}
+	
+	// insert some data
+	function update($table,$data)
+	{
+		$this->mode = 'update';
+		$this->_UPDATE_ARGS = Array();
+		$this->_UPDATE_ARGS['table']=$table;
+		if(empty($this->_UPDATE_ARGS['data']))
+			$this->_UPDATE_ARGS['data']=Array();
+	
+		foreach ($data as $k => $v)
+			$this->_UPDATE_ARGS['data'][$k]=$v;
+		
+	
+		//$this->_SELECT_ARGS['scheme']=&$this->_SCHEME;
+		return $this;	
+	}
+	
+	function set($fld,$val)
+	{
+		switch($this->mode)
+		{
+			
+			case 'update':
+				$this->_UPDATE_ARGS['data'][$fld]=$val;
+		}
+		return $this;
+	}
+	
+	function where($_WHERE)
+	{
+		switch($this->mode)
+		{
+			case 'select':
+				$this->_SELECT_ARGS['where']=$_WHERE;
+				break;
+			case 'update':
+				$this->_UPDATE_ARGS['where']=$_WHERE;
+				break;
+			case 'delete':
+				$this->_DELETE_ARGS['where']=$_WHERE;
+				break;
+		}
+		return $this;
 	}
 	
 	// joins

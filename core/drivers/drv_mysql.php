@@ -167,6 +167,22 @@ class DBD_Mysql extends DBDriver
 			$arr[]= substr($row[0],strlen($this->_PREFIX));
 		return $arr;
 	}
+	
+	function exe_query($q,$exept=true)
+	{
+		$res = mysql_query($q,$this->_LINK);
+		if($exept)
+		{
+			if($res==FALSE)
+				throw new Exception("Bad query result [$q] ");
+		}
+		return $res;
+	}
+	// get row of result
+	function res_row($res)
+	{
+		return mysql_fetch_array($res,MYSQL_ASSOC);
+	}
 	// get associative array of normalized fields
 	
 	// query select
@@ -245,51 +261,27 @@ class DBD_Mysql extends DBDriver
 
 	}
 	
-	function exe_query($q,$exept=true)
-	{
-		$res = mysql_query($q,$this->_LINK);
-		if($exept)
-			{
-			if($res==FALSE)
-				throw new Exception("Bad query result [$q] ");
-			}
-		return $res;
-	}
-	// get row of result
-	function res_row($res)
-	{
-		return mysql_fetch_array($res,MYSQL_ASSOC);
-	}
+
 	// query delete
 	function q_delete($del_params)
 	{
-	
+		if(empty($del_params['where']))
+			$del_params['where']=1;
+		$sql = "DELETE FROM `{$this->_PREFIX}{$del_params['table']}` WHERE ".$del_params['where'];
+		
+		return $sql;
 	
 	}
 	// query select
-	function q_delete_item($id)
-	{
-	
-	
+	function q_delete_item($params)
+	{			
+		$sql = "DELETE FROM `{$this->_PREFIX}{$params['table']}` WHERE id=".$params['id'];
+		
+		return $sql;
 	}
 	// query add
 	function q_add($add_data)
-	{
-		/*
-		 INSERT INTO  `dbmantest`.`tdb_project` (
-`id` ,
-`name` ,
-`user` ,
-`date`
-)
-VALUES (
-NULL ,  '123',  '1', NOW( )
-), (
-NULL ,  '456',  '1', NOW( )
-); 
-		 
-		 * */
-		
+	{		
 	//	var_dump($add_data);
 		$sql1 = "INSERT INTO `{$this->_PREFIX}{$add_data['table']}` (";
 		$sql2 = ") VALUES ";
@@ -329,7 +321,26 @@ NULL ,  '456',  '1', NOW( )
 	// query update
 	function q_update($upd_data)
 	{
+		$sql = "UPDATE {$this->_PREFIX}{$upd_data['table']} SET ";
+		$i = 0;
+		foreach($upd_data as $col => $val)
+		{
+			if($val[0]=='@')
+			{
+				$val = sustr($val,1);
+				$newelement = "`$col`=$val";
+			}
+			else 
+				$newelement = "`$col`='$val'";
+			
+			if($i)
+				$sql .= ", $newelement";
+			else 
+				$sql .= $newelement;
+			$i++;
+		}
 		
+		return  $sql;
 	}
 	// Commit all bindings
 	VAR $_BINDINGS = Array();

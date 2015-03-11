@@ -97,5 +97,6 @@ while($row=$mydb->scheme->res_row($res))
 			Array('login'=>'user2','name'=>'user2')
 			)
 	)->exe();
+	
 //var_dump($mydb);
 ?>
