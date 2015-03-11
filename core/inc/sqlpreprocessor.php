@@ -151,7 +151,12 @@ class sqlpreprocessor {
 		// 
 		function chain_field($str,$table,&$selects)
 		{
-			
+			if($str[0]=='$') // аргумент напрямую
+			{
+				$str = substr($str,1);
+				$selects[]=$str;		
+				return ;
+			}
 			$_AS = NULL;	// field AS ...
 			$nullable = false;
 			$jtype = 'left';

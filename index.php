@@ -40,7 +40,7 @@ while($row=$mydb->scheme->res_row($res))
 	var_dump($row);
 }
 */
-	/*
+	
 	$res = $mydb->scheme->select('project',Array(
 			'name',
 			'user|login as userlogin',			
@@ -53,7 +53,7 @@ while($row=$mydb->scheme->res_row($res))
 	{
 		var_dump($row);
 	}
-	*/
+	
 	/*
 	$mydb->scheme->insert('user',Array(
 			Array('login'=>'user1','name'=>'user1'),
@@ -69,6 +69,6 @@ while($row=$mydb->scheme->res_row($res))
 	)->exe();
 	*/
 	// $mydb->scheme->delete('user')->where("login='user1'")->exe();
-	$mydb->scheme->delete_item('user',5)->exe();
+	//$mydb->scheme->delete_item('user',5)->exe();
 //var_dump($mydb);
 ?>

@@ -195,12 +195,17 @@ class DBD_Mysql extends DBDriver
 			$i=0;
 			foreach ($selects as $selkey => $selitem)
 			{
+				if(is_string($selitem))
+					$str_select = $str_select.", $selitem";
+				else 
+				{
 				/*echo ">>\n";
-				var_dump($selitem);*/
-				if($i)
-					$str_select = $str_select.", $_PREFIX{$selitem['table']}.{$selitem['fld']} as $selkey";
-				else
-					$str_select = $str_select."$_PREFIX{$selitem['table']}.{$selitem['fld']} as $selkey";
+					var_dump($selitem);*/
+					if($i)
+						$str_select = $str_select.", $_PREFIX{$selitem['table']}.{$selitem['fld']} as $selkey";
+					else
+						$str_select = $str_select."$_PREFIX{$selitem['table']}.{$selitem['fld']} as $selkey";
+				}
 				$i++;
 			}
 			return $str_select;
