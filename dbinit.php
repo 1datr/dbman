@@ -16,6 +16,7 @@ $mydb->scheme->add('group',Array(
 				),
 		)
 ));
+
 $mydb->scheme->add('groupmember',Array(
 		'user'=>'#user.id',
 		//'fld1'=>'varchar',
@@ -49,6 +50,14 @@ $mydb->scheme->add('mail',Array(
 		'date'=>'datetime',
 ));
 
+$mydb->scheme->add('article',Array(
+		'name'=>'text',
+		'autor'=>'#user.id',
+		'atext'=>'memo',
+		'date'=>'datetime',
+));
+//var_dump($mydb->scheme);
+$_QDEBUG =TRUE;
 $mydb->commit();
 
 $mydb->scheme->insert('user',Array(

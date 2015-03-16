@@ -141,9 +141,11 @@ class DBScheme extends QMan
 	//	var_dump($this->_SCHEME);
 		// ������ ������ ������� ��, ������� ��� � �����
 		$tables = $this->_DRV->TableList();
-		
+		//echo "TABLES:";
+		//var_dump($tables);
 		foreach($tables as $tbl)
 		{
+		//	echo "<br />>>>$tbl";
 			if(empty($this->_SCHEME[$tbl]))
 			{
 				//var_dump($tbl);
@@ -151,9 +153,10 @@ class DBScheme extends QMan
 			}
 		}
 		// ���������/��������
+		
 		foreach($this->_SCHEME as $key => $obj)
 		{
-							
+				echo "\n<br />".count($this->_SCHEME);		
 			$this->_DRV->CommitObject($key,$obj);
 		}
 		

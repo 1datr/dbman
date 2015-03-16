@@ -194,10 +194,16 @@ class DBD_Mysql extends DBDriver
 	{
 		if($where==1)
 			$where = "`table` LIKE '{$this->_PREFIX}%'";
-		$res = $this->exe_query("SHOW OPEN TABLES WHERE $where");
+		$res = $this->exe_query("SHOW TABLES");
 		$arr = Array();
+		//echo "SHOW OPEN TABLES WHERE $where";
 		while($row = mysql_fetch_array($res))
-			$arr[]= substr($row['Table'],strlen($this->_PREFIX));
+		{
+			//echo "ROW:";var_dump($row);
+			//echo ">>".$row['Table'];
+			$arr[]= substr($row[0],strlen($this->_PREFIX));
+		}
+		//var_dump($arr);
 		return $arr;
 	}
 	
