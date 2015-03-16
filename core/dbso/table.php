@@ -49,6 +49,7 @@ class DBSTable {
 		$typeinfo["charset"]='';
 		$typeinfo["sub_charset"]='';
 		$typeinfo["defdata"]=Array();
+		$typeinfo["virtual"]=FALSE;	// the field is virtual
 		//$typeinfo['bind']=NULL;
 	
 		if(is_string($info))
@@ -64,6 +65,10 @@ class DBSTable {
 						'on_delete'=>'RESTRICT',
 						'on_update'=>'RESTRICT');
 			}
+			elseif($info[0]=='/') // &fld - virtual field
+			{
+				$typeinfo["virtual"]=TRUE;
+			}
 			else
 				$typeinfo['Type']=$info;
 				
@@ -78,6 +83,8 @@ class DBSTable {
 				$typeinfo["defdata"]=$info['defdata'];
 		}
 		//echo "BIND > ";// var_dump($info['bind']);
+		if(!empty($info["virtual"]))
+			$typeinfo["virtual"] = $info["virtual"];
 		if(!empty($info['bind']))
 		{
 			if($typeinfo['bind']==NULL)

@@ -36,6 +36,26 @@ class DBD_Mysql extends DBDriver
 	{ 
 	
 	}
+	
+	function dbg($_LINE,$sql)
+	{
+		global $_QDEBUG;
+		if($_QDEBUG)
+			echo "[".$_LINE." (".__FILE__.")]".$sql."<br/>";
+		
+	}
+	// Get table stucture
+	function getTableStruct($tblname)
+	{
+		$arr = Array();
+		$res = $this->exe_query("SHOW COLUMNS FROM ".$this->_PREFIX.$tblname);
+		while($row = mysql_fetch_array($res))
+		{
+			
+			$arr[]=$row;
+		}
+		return $arr;
+	}
 	// Change table
 	function ChangeTable($tblname,$TableData)
 	{ 
@@ -46,40 +66,47 @@ class DBD_Mysql extends DBDriver
 		// walk all columns
 		while($row = mysql_fetch_array($res))
 		{
-			
+
 			if(empty($TableData->_FIELDS[$row[0]]))	// no this columns in scheme
 			{
 				if($row[0]!='id')
 					$this->exe_query("ALTER TABLE `".$this->_PREFIX.$tblname."` DROP ".$row[0]);
 			}
+			elseif ($TableData->_FIELDS[$row[0]]['virtual'])
+			{
+				$this->exe_query("ALTER TABLE `".$this->_PREFIX.$tblname."` DROP ".$row[0]);
+				
+			}
 			else 
 			{
 				// Watch the difference between field image and the real field 
 				$fldinfo = $TableData->_FIELDS[$row[0]];
-				//var_dump($TableData->_FIELDS[$row[0]]);
-				if(!empty($TableData->_FIELDS[$row[0]]['bind']))
+				if(!$fldinfo['virtual'])
 				{
-					//	echo ">>";
-					//var_dump($TableData->_FIELDS);
-					
-					$this->_BINDINGS[]=Array(
-							'tblname'=>$tblname,
-							'field'=>$row[0],
-							'bind_data'=>&$TableData->_FIELDS[$row[0]]['bind'],
-					);
-					
-					
-				}
+					//var_dump($TableData->_FIELDS[$row[0]]);
+					if(!empty($TableData->_FIELDS[$row[0]]['bind']))
+					{
+						//	echo ">>";
+						//var_dump($TableData->_FIELDS);
+						
+						$this->_BINDINGS[]=Array(
+								'tblname'=>$tblname,
+								'field'=>$row[0],
+								'bind_data'=>&$TableData->_FIELDS[$row[0]]['bind'],
+						);
+						
+						
+					}
 			/*	
 			 * ALTER TABLE  `tdb_user` CHANGE  `name`  `name` TEXT CHARACTER SET utf8 COLLATE utf8_estonian_ci NOT NULL ;
 			 * 
 			 * */
-				$str_collate = "";
-				if($fldinfo['charset']!='')
-				{
-					$str_collate = " CHARACTER SET ".$fldinfo['charset']." COLLATE ".$fldinfo['sub_charset']." ";
-				
-				}
+					$str_collate = "";
+					if($fldinfo['charset']!='')
+					{
+						$str_collate = " CHARACTER SET ".$fldinfo['charset']." COLLATE ".$fldinfo['sub_charset']." ";
+					
+					}
 				
 		/*		if(($row['Type']!=$fldinfo['Type'])||($row['Null']!=$fldinfo['Null']))
 				{*/
@@ -90,15 +117,14 @@ class DBD_Mysql extends DBDriver
 					else
 						$fldstr = "`".$row[0]."` ".$fldinfo['Type']." $str_collate  Default ".$fldinfo['Default']." ".$nullstr;
 					$_sql = "ALTER TABLE  `".$this->_PREFIX.$tblname."` CHANGE  `".$row[0]."`  $fldstr ";
-					global $_DEBUG;
-					if($_DEBUG)
-						echo $_sql."\n";
+					$this->dbg(__LINE__,$_sql);
 					$this->exe_query($_sql);
 			//	}
 				
-				
+					$fields[]=$row[0];
+				}
 			}
-			$fields[]=$row[0];
+			
 			
 		}
 		
@@ -109,16 +135,21 @@ class DBD_Mysql extends DBDriver
 			if(!in_array($fldname, $fields))
 			{
 				$fldinfo = $this->CheckField($fldimage);
-				$nullstr = ($fldinfo['Null']=="NO") ? "NOT NULL" : "NULL";
-				if($fldinfo['Default']==NULL)
-					$sql = "ALTER TABLE `".$this->_PREFIX.$tblname."` ADD `$fldname` ".$fldinfo['Type']." $nullstr";
-				else
-					$sql = "ALTER TABLE `".$this->_PREFIX.$tblname."` ADD `$fldname` ".$fldinfo['Type']." Default ".$fldinfo['Default']." $nullstr";
-				global $_DEBUG;
-				if($_DEBUG)
-						echo $sql."\n";				//var_dump($sql);
-				$this->exe_query($sql);
+				if(!$fldinfo['virtual'])
+				{
+					$nullstr = ($fldinfo['Null']=="NO") ? "NOT NULL" : "NULL";
+					if($fldinfo['Default']==NULL)
+						$sql = "ALTER TABLE `".$this->_PREFIX.$tblname."` ADD `$fldname` ".$fldinfo['Type']." $nullstr";
+					else
+						$sql = "ALTER TABLE `".$this->_PREFIX.$tblname."` ADD `$fldname` ".$fldinfo['Type']." Default ".$fldinfo['Default']." $nullstr";
+					global $_QDEBUG;
+					if($_QDEBUG)
+							echo "[".__LINE__."]".$sql."<br/>";				//var_dump($sql);
+					$this->exe_query($sql);
+				}
 			}
+			
+			
 		}
 		//var_dump($fields);
 	}
@@ -153,20 +184,24 @@ class DBD_Mysql extends DBDriver
 		if(empty($bind_data['on_update']))
 			$bind_data['on_update']='RESTRICT';
 		$query = "ALTER TABLE `".$this->_PREFIX.$tblname."` ADD FOREIGN KEY ( `$field` ) REFERENCES `".$this->_PREFIX.$tblname."` (`".$bind_data['field_to']."`) ON DELETE ".$bind_data['on_delete']." ON UPDATE ".$bind_data['on_update']."";
-		global $_DEBUG;
-		if($_DEBUG)
-			echo $query;
+		
+		$this->dbg(__LINE__,$query);
+		
 		$this->exe_query($query);
 	}
 	// List of tavble in database now
-	function TableList()
+	function TableList($where=1)
 	{
-		$res = $this->exe_query("SHOW TABLES");
+		if($where==1)
+			$where = "`table` LIKE '{$this->_PREFIX}%'";
+		$res = $this->exe_query("SHOW OPEN TABLES WHERE $where");
 		$arr = Array();
 		while($row = mysql_fetch_array($res))
-			$arr[]= substr($row[0],strlen($this->_PREFIX));
+			$arr[]= substr($row['Table'],strlen($this->_PREFIX));
 		return $arr;
 	}
+	
+
 	
 	function exe_query($q,$exept=true)
 	{
@@ -199,8 +234,7 @@ class DBD_Mysql extends DBDriver
 					$str_select = $str_select.", $selitem";
 				else 
 				{
-				/*echo ">>\n";
-					var_dump($selitem);*/
+
 					if($i)
 						$str_select = $str_select.", $_PREFIX{$selitem['table']}.{$selitem['fld']} as $selkey";
 					else
@@ -261,7 +295,7 @@ class DBD_Mysql extends DBDriver
 		
 		$sql = "SELECT ".make_select_str($select_params['select'],$this->_PREFIX)." FROM ".$this->_PREFIX.$select_params['table']." ".
 				make_join_str($select_params['joins'],$select_params,$this->_PREFIX)." WHERE ".$select_params['where']." ".$_limit ;
-		//echo $sql;
+		$this->dbg(__LINE__,$sql);
 		return $sql;
 
 	}
@@ -273,7 +307,7 @@ class DBD_Mysql extends DBDriver
 		if(empty($del_params['where']))
 			$del_params['where']=1;
 		$sql = "DELETE FROM `{$this->_PREFIX}{$del_params['table']}` WHERE ".$del_params['where'];
-		
+		$this->dbg(__LINE__,$sql);
 		return $sql;
 	
 	}
@@ -281,7 +315,7 @@ class DBD_Mysql extends DBDriver
 	function q_delete_item($params)
 	{			
 		$sql = "DELETE FROM `{$this->_PREFIX}{$params['table']}` WHERE id=".$params['id'];
-		//echo $sql;
+		$this->dbg(__LINE__,$sql);
 		return $sql;
 	}
 	// query add
@@ -345,6 +379,7 @@ class DBD_Mysql extends DBDriver
 			$i++;
 		}
 		$sql = $sql." WHERE {$upd_data['where']}";
+		$this->dbg(__LINE__,$sql);
 		return  $sql;
 	}
 	// Commit all bindings
@@ -379,6 +414,9 @@ class DBD_Mysql extends DBDriver
 			foreach ($TableData->_FIELDS as $name => $fld)
 			{
 				$fldinfo = $this->CheckField($fld);
+				
+				if($fldinfo['virtual']) continue;
+				
 				$nullstr = ($fldinfo['Null']=="NO") ? "Not null" : "Null";
 				if($fldinfo['Default']==NULL)
 					$fldstr = "`$name` ".$fldinfo['Type']." ".$nullstr;
@@ -391,10 +429,10 @@ class DBD_Mysql extends DBDriver
 			$sql = $sql."
 	PRIMARY KEY(`id`)
 	)";
-			global $_DEBUG;
-			if($_DEBUG)
-				echo  $sql;
-			
+			global $_QDEBUG;
+			if($_QDEBUG)
+				echo "[".__LINE__."]".$sql."<br/>";
+			$this->dbg(__LINE__,$sql);
 			$this->exe_query($sql);
 			
 			foreach ($TableData->_FIELDS as $name => $fld)

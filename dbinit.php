@@ -2,7 +2,8 @@
 $mydb->scheme->add('user',Array(
 		'login'=>'text',
 		'password'=>'text',
-		'name'=>Array("Type"=>'text','charset'=>'utf8')
+		'name'=>Array("Type"=>'text','charset'=>'utf8'),
+		'avatar'=>'/avatar',
 ));
 $mydb->scheme->add('group',Array(
 		'name'=>'text',
@@ -37,6 +38,14 @@ $mydb->scheme->add('project',Array(
 		'name'=>'text',
 		'user'=>'#user.id',
 		//'fld1'=>'varchar',
+		'date'=>'datetime',
+));
+
+$mydb->scheme->add('mail',Array(
+		'topic'=>'text',
+		'userfrom'=>'#user.id',
+		'userto'=>'#user.id',
+		'message'=>'memo',
 		'date'=>'datetime',
 ));
 

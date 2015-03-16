@@ -1,30 +1,54 @@
 <?php 
 
 require_once dirName(__FILE__).'/core/index.php';
-$_DEBUG=FALSE;
+$_QDEBUG=FALSE;
 require_once dirName(__FILE__).'/config.php';
 $mydb = new db($connection);
 
-if(file_exists('./db.ser'))
+$ser_file = './db.ser';
+$_marker_file = "./.lift";
+
+
+function initialize()
 {
-	$mydb->scheme->import('./db.ser');
-	//$mydb->commit();
-}
-else
-{
+	GLOBAL $mydb;
+	GLOBAL $_QDEBUG;
 	require dirName(__FILE__).'/dbinit.php';
 	
 	$mydb->commit();
 	$mydb->scheme->gettable('user')->addfield('avatar','text');
 	
-	//$_DEBUG=TRUE;
+//	$_QDEBUG=TRUE;
 	$mydb->commit();
 	$mydb->scheme->export('./db.ser');
 }
 
-	$_DEBUG=TRUE;
-//  $mydb->scheme->export('./db.jsd',DSIE_JSON);
-//$mydb->scheme->export('./db.xml',DSIE_XML);
+if(!file_exists($ser_file))
+{
+	file_put_contents($_marker_file, time());
+	initialize();
+}
+else
+{
+	
+	$_t_change = filemtime($ser_file); // time of last init file change
+	$_t_lif = time();
+	
+	
+	if(file_exists($_marker_file))	// if time last
+	{
+		$_t_lif = (int)file_get_contents($_marker_file);	
+	}
+	
+	if($_t_change>$_t_lif)
+	{
+		file_put_contents($ser_file, time());
+		initialize();
+	}
+	else
+		$mydb->scheme->import('./db.ser');
+	//$mydb->commit();
+}
 
 	/*
 $res = $mydb->scheme->select('groupmember',Array(

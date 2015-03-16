@@ -70,6 +70,36 @@ class DBScheme extends QMan
 			
 		}		
 	}
+	// scan database and make datascheme
+	function scandb()
+	{
+		$res = $this->_DRV->TableList();
+	//	var_dump($res);
+		foreach($res as $tbl)
+		{
+			$tableinfo = $this->_DRV->getTableStruct($tbl);
+			$fldlist = Array();
+			foreach ($tableinfo as $fld)
+			{
+				if($fld[0]=='Id')
+					continue;
+				
+				var_dump($fld);
+				
+				$fldlist[$fld['Field']]=Array(
+						'Type'=>$fld['Type'],
+						'Default'=>$fld['Default'],
+						"Null"=>$fld["Null"],
+						
+				);
+
+			}
+			$this->add($tbl,$fldlist);
+				
+			
+		}
+		//var_dump($this);
+	}
 	// Import datascheme from file
 	function import($fname)
 	{
@@ -94,7 +124,7 @@ class DBScheme extends QMan
 		}
 	}
 	
-	
+	// Привести информацию о столбцах таблицы в нормальную форму
 	function normalize()
 	{
 		foreach ($this->_SCHEME as $tbl => $t)
