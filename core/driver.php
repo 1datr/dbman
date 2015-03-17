@@ -1,6 +1,8 @@
 <?php 
 // driver of database
 abstract class DBDriver {
+	
+	VAR $currentdb;
 	// Connect to server
 	abstract function Connect($connData);
 	// Disconnect from db

@@ -18,7 +18,8 @@ class DBD_Mysql extends DBDriver
 		or die("Could not connect: " . mysql_error());
 		
 		$this->_PREFIX=$connData['prefix'];
-		mysql_select_db($connData['dbname'],$this->_LINK);
+		if(mysql_select_db($connData['dbname'],$this->_LINK))
+			$this->currentdb = $connData['dbname'];
 	}
 	// Disconnect from db
 	function Disonnect($disconnectvar=NULL)
@@ -56,6 +57,21 @@ class DBD_Mysql extends DBDriver
 		}
 		return $arr;
 	}
+	
+	function DeleteConstraint($tbl,$ckey)
+	{
+		$query = "ALTER TABLE `".$this->_PREFIX.$tbl."` DROP FOREIGN KEY $ckey ";
+		$this->exe_query($query);
+	}
+	// delete field of table
+	function DeleteField($fld,$tbl)
+	{
+		$keyname = "key_$tbl_$fld";
+		
+		$this->DeleteConstraint($tbl,$keyname);
+		
+		$this->exe_query("ALTER TABLE `".$this->_PREFIX.$tbl."` DROP $fld");
+	}
 	// Change table
 	function ChangeTable($tblname,$TableData)
 	{ 
@@ -70,7 +86,8 @@ class DBD_Mysql extends DBDriver
 			if(empty($TableData->_FIELDS[$row[0]]))	// no this columns in scheme
 			{
 				if($row[0]!='id')
-					$this->exe_query("ALTER TABLE `".$this->_PREFIX.$tblname."` DROP ".$row[0]);
+					$this->DeleteField($row[0],$tblname);
+					
 			}
 			elseif ($TableData->_FIELDS[$row[0]]['virtual'])
 			{
@@ -176,14 +193,49 @@ class DBD_Mysql extends DBDriver
 	{
 		//return $fld_array['type']
 	}
+	// Get constraints of table optionally - field constraint name
+	function GetConstraints($table,$field=NULL,$conname=NULL)
+	{
+		$where = "";
+		if($field!=NULL)
+			$where = " AND COLUMN_NAME = '$field' ";
+		if($conname!=NULL)
+		{
+			if($where!="")
+				$where = "$where AND ";
+			$where = "$where CONSTRAINT_NAME = $conname";
+		}
+		$sql = "SELECT * 
+ FROM information_schema.KEY_COLUMN_USAGE 
+ WHERE TABLE_SCHEMA ='{$this->currentdb}' AND TABLE_NAME ='".$this->_PREFIX.$table."' AND 
+ CONSTRAINT_NAME <>'PRIMARY' AND REFERENCED_TABLE_NAME 
+ is not null $where";
+		$res = $this->exe_query($sql);
+		$rows = Array();
+		while($row = $this->res_row($res))
+		{
+			$rows[]=$row;
+		}
+		return $rows;
+	}
 	
 	function create_binding($tblname,$field,$bind_data)
 	{
+		$conns = $this->GetConstraints($tblname,$field);
+		//var_dump($conns);
+		foreach($conns as $conn)
+		{
+			$this->DeleteConstraint($tblname,$conn['CONSTRAINT_NAME']);
+		}
 		if(empty($bind_data['on_delete']))
 			$bind_data['on_delete']='CASCADE';
 		if(empty($bind_data['on_update']))
 			$bind_data['on_update']='RESTRICT';
-		$query = "ALTER TABLE `".$this->_PREFIX.$tblname."` ADD FOREIGN KEY ( `$field` ) REFERENCES `".$this->_PREFIX.$tblname."` (`".$bind_data['field_to']."`) ON DELETE ".$bind_data['on_delete']." ON UPDATE ".$bind_data['on_update']."";
+		$keyname = "key_".$tblname."_".$field;
+		$query = "ALTER TABLE `".$this->_PREFIX.$tblname."` 
+ADD CONSTRAINT `$keyname` FOREIGN KEY ( `$field` ) 
+REFERENCES `".$this->_PREFIX.$tblname."` (`".$bind_data['field_to']."`) 
+ON DELETE ".$bind_data['on_delete']." ON UPDATE ".$bind_data['on_update']."";
 		
 		$this->dbg(__LINE__,$query);
 		
@@ -215,7 +267,7 @@ class DBD_Mysql extends DBDriver
 		if($exept)
 		{
 			if($res==FALSE)
-				throw new Exception("Bad query result [$q] ");
+				throw new Exception("Bad query result [$q] (".mysql_errno().": ".mysql_error().")  ");
 		}
 		return $res;
 	}

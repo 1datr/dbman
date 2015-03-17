@@ -16,7 +16,7 @@ $mydb->scheme->add('group',Array(
 				),
 		)
 ));
-
+//  
 $mydb->scheme->add('groupmember',Array(
 		'user'=>'#user.id',
 		//'fld1'=>'varchar',
