@@ -84,7 +84,7 @@ class DBScheme extends QMan
 				if($fld[0]=='Id')
 					continue;
 				
-				var_dump($fld);
+				//var_dump($fld);
 				
 				$fldlist[$fld['Field']]=Array(
 						'Type'=>$fld['Type'],

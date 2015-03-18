@@ -53,6 +53,9 @@ class DBD_Mysql extends DBDriver
 		while($row = mysql_fetch_array($res))
 		{
 			
+			$constraints = $this->GetConstraints($tblname,$row['Field']);
+			$row['constraints'] = $constraints;
+			
 			$arr[]=$row;
 		}
 		return $arr;
