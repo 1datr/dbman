@@ -63,6 +63,17 @@ class DBD_Mysql extends DBDriver
 		$query = "ALTER TABLE `".$this->_PREFIX.$tbl."` DROP FOREIGN KEY $ckey ";
 		$this->exe_query($query);
 	}
+	// Get rows of the table
+	function GetTableRows($tbl)
+	{
+		$arr = Array();
+		$res = $this->exe_query("SELECT * FROM `".$this->_PREFIX.$tbl."`");
+		while ($row = $this->res_row($res))
+		{
+			$arr[]=$row;
+		}
+		return $arr;
+	}
 	// delete field of table
 	function DeleteField($fld,$tbl)
 	{

@@ -15,6 +15,8 @@ abstract class DBDriver {
 	abstract function DeleteTable($tblname);
 	// Select queries
 	abstract function Select($selectdata);
+	
+	abstract function GetTableRows($tbl);
 	// Commit data table
 	abstract function CommitTable($tblname,$TableData);	
 	// List of table

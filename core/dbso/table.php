@@ -4,10 +4,12 @@ $resx = NULL;
 class DBSTable {
 	// Operator for select
 	VAR $_FIELDS;
+	VAR $_DEFDATA;
 			
-	function  __construct($name,$data = NULL)
+	function  __construct($name,$data = NULL,$defdata=NULL)
 	{
 		$this->_FIELDS = $data;
+		$this->_DEFDATA = $defdata;
 	}
 	
 	function addfield($fldname,$fldinfo)
