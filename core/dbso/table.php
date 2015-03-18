@@ -83,13 +83,13 @@ class DBSTable {
 				$typeinfo["defdata"]=$info['defdata'];
 		}
 		//echo "BIND > ";// var_dump($info['bind']);
-		if(!empty($info["virtual"]))
-			$typeinfo["virtual"] = $info["virtual"];
-		if(!empty($info['bind']))
+		if(xarray_key_exists("virtual",$info))
 		{
-			if($typeinfo['bind']==NULL)
-				if(is_array($info['bind']))
-					$typeinfo['bind']=$info['bind'];
+			$typeinfo["virtual"] = $info["virtual"];
+		}
+		if(xarray_key_exists('bind',$info))
+		{
+			$typeinfo['bind']=$info['bind'];
 		}
 		$sinonims = Array("string"=>"text","memo"=>"longtext","logic"=>"BOOLEAN","logical"=>"BOOLEAN");// datatype synonims
 		if(!empty($sinonims[$typeinfo['Type']]))

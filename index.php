@@ -7,13 +7,15 @@ $mydb = new db($connection);
 
 $ser_file = './db.ser';
 $_marker_file = "./.lift";
+$_init_file = dirName(__FILE__).'/dbinit.php';
 
 
 function initialize()
 {
 	GLOBAL $mydb;
 	GLOBAL $_QDEBUG;
-	require dirName(__FILE__).'/dbinit.php';
+	GLOBAL $_init_file;
+	require $_init_file;
 	
 	$mydb->commit();
 	$mydb->scheme->gettable('user')->addfield('avatar','text');
@@ -31,7 +33,7 @@ if(!file_exists($ser_file))
 else
 {
 	
-	$_t_change = filemtime($ser_file); // time of last init file change
+	$_t_change = filemtime($_init_file); // time of last init file change
 	$_t_lif = $_t_change-6;	// last time when the init script was run
 
 	if(file_exists($_marker_file))	// if time last
@@ -39,7 +41,7 @@ else
 		$_Marker=file_get_contents($_marker_file);		
 		$_t_lif = (int)	$_Marker;
 	}
-	echo $_t_change.">>".$_t_lif."<br/>";
+//	echo $_t_change.">>".$_t_lif."<br/>";
 	if($_t_change>$_t_lif)
 	{
 		file_put_contents($_marker_file, time());

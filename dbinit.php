@@ -56,8 +56,8 @@ $mydb->scheme->add('article',Array(
 		'atext'=>'memo',
 		'date'=>'datetime',
 ));
-//var_dump($mydb->scheme);
-$_QDEBUG =TRUE;
+//var_dump($mydb->scheme);  //
+//$_QDEBUG =TRUE;
 $mydb->commit();
 
 $mydb->scheme->insert('user',Array(

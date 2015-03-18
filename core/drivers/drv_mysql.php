@@ -98,6 +98,13 @@ class DBD_Mysql extends DBDriver
 			{
 				// Watch the difference between field image and the real field 
 				$fldinfo = $TableData->_FIELDS[$row[0]];
+				
+		/*		if($tblname=='user')
+				{
+					echo "fldinfo:";
+					var_dump($fldinfo);
+				}*/
+				
 				if(!$fldinfo['virtual'])
 				{
 					//var_dump($TableData->_FIELDS[$row[0]]);
@@ -147,8 +154,12 @@ class DBD_Mysql extends DBDriver
 		
 		foreach($TableData->_FIELDS as $fldname => $fldimage)
 		{
-			
-			
+		/*	if($tblname=='user')
+			{
+				echo "fldinfo: $fldname -> ";
+				var_dump($fldimage);
+			}
+			*/
 			if(!in_array($fldname, $fields))
 			{
 				$fldinfo = $this->CheckField($fldimage);
@@ -263,8 +274,9 @@ ON DELETE ".$bind_data['on_delete']." ON UPDATE ".$bind_data['on_update']."";
 	
 	function exe_query($q,$exept=true)
 	{
+		global $_QSKIP;
 		$res = mysql_query($q,$this->_LINK);
-		if($exept)
+		if($exept && !$_QSKIP)
 		{
 			if($res==FALSE)
 				throw new Exception("Bad query result [$q] (".mysql_errno().": ".mysql_error().")  ");

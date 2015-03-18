@@ -1,6 +1,7 @@
 <?php 
 $res =null;
 $_DEBUG=TRUE;
+$_QSKIP=FALSE;
 require_once dirName(__FILE__).'/config.php';
 
 $d = dir(dirName(__FILE__).'/dbso/');
@@ -14,6 +15,9 @@ $d->close();
 
 require_once dirName(__FILE__).'/scheme.php';
 require_once dirName(__FILE__).'/driver.php';
+require_once $DIR_INC.'/utils.php';
+require_once $DIR_INC.'/extention.php';
+
 
 // require database drivers
 foreach ($DBMAN_DRVLIST as $drv)
