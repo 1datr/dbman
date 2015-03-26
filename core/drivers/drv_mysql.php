@@ -72,29 +72,40 @@ class DBD_Mysql extends DBDriver
 	{
 		foreach ($defdata as $key => $nfo)
 		{
-			// make exist query
-		/*	$where = "";
-			$i=0;
-			foreach ($nfo['defdata'] as $fld => $val)
+			// make exist queries
+			
+			foreach ($nfo['defdata'] as $idx => $dditem)
 			{
-				$where = "$where AND ";
-				$where = "$where `$fld`='$val'";
-				$i++;
+				$where = "";
+				$i=0;
+				foreach ($dditem as $fld => $val)
+				{
+					if($i) 
+						$where = "$where AND ";
+					$where = "$where `$fld`='$val'";
+					$i++;
+				}
+				$qselect = "SELECT * FROM {$this->_PREFIX}".$nfo['key']." WHERE $where";
+				$res_select = $this->exe_query($qselect);
+				$selcount = $this->res_count($res_select);
+				// if exists - delete
+				if($selcount>0)
+				{
+					unset($nfo['defdata'][$idx]);
+				}
 			}
-			$qselect = "SELECT * FROM {$this->_PREFIX}".$nfo['key']." WHERE $where";
-			$res_select = $this->exe_query($qselect);
-			$selcount = $this->res_count($res_select);
+		
+			
 			// no such data
-			if($selcount==0)
-			{*/
-				$q = $this->q_add(
+			
+		$q = $this->q_add(
 					Array(
 						'table'=>$nfo['key'],
 						'data'=>$nfo['defdata'],
 					)
 				);
-				$this->exe_query($q);
-		//	}
+		$this->exe_query($q);
+			
 		}
 	}
 	
