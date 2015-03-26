@@ -40,7 +40,14 @@ class DBScheme extends QMan
 		switch ($objtype)
 		{
 			case DSOT_DB: 
-					$this->_SCHEME[$objname] = new DBSTable($objname,$obj_params);
+					if(xarray_key_exists('#defdata', $obj_params))
+					{
+						$defdata = $obj_params['#defdata'];
+						unset($obj_params['#defdata']);
+						$this->_SCHEME[$objname] = new DBSTable($objname,$obj_params,$defdata);
+					}
+					else 
+						$this->_SCHEME[$objname] = new DBSTable($objname,$obj_params);
 				break;
 			case DSOT_VIEW:
 				
@@ -153,14 +160,22 @@ class DBScheme extends QMan
 			}
 		}
 		// ���������/��������
-		
+		$_DEFDATA=Array();
 		foreach($this->_SCHEME as $key => $obj)
 		{
 			//	echo "\n<br />".count($this->_SCHEME);		
+			if(property_exists($obj,"_DEFDATA"))
+			{
+				if($obj->_DEFDATA!=NULL)
+					$_DEFDATA[]=Array('key'=>$key,'defdata'=>$obj->_DEFDATA);
+			}
 			$this->_DRV->CommitObject($key,$obj);
+			
 		}
 		
 		$this->_DRV->CommitBindings();
+		// write default data
+		$this->_DRV->WriteDefData($_DEFDATA);
 		
 	}
 	// get the table

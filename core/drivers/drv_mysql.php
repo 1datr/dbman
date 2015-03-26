@@ -58,7 +58,44 @@ class DBD_Mysql extends DBDriver
 			
 			$arr[]=$row;
 		}
+		//var_dump($arr);
 		return $arr;
+	}
+	
+	function res_count($res)
+	{
+		return mysql_num_rows($res);
+	}
+	
+	// write default data to tables
+	function WriteDefData($defdata=NULL)
+	{
+		foreach ($defdata as $key => $nfo)
+		{
+			// make exist query
+		/*	$where = "";
+			$i=0;
+			foreach ($nfo['defdata'] as $fld => $val)
+			{
+				$where = "$where AND ";
+				$where = "$where `$fld`='$val'";
+				$i++;
+			}
+			$qselect = "SELECT * FROM {$this->_PREFIX}".$nfo['key']." WHERE $where";
+			$res_select = $this->exe_query($qselect);
+			$selcount = $this->res_count($res_select);
+			// no such data
+			if($selcount==0)
+			{*/
+				$q = $this->q_add(
+					Array(
+						'table'=>$nfo['key'],
+						'data'=>$nfo['defdata'],
+					)
+				);
+				$this->exe_query($q);
+		//	}
+		}
 	}
 	
 	function DeleteConstraint($tbl,$ckey)

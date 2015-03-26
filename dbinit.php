@@ -4,6 +4,11 @@ $mydb->scheme->add('user',Array(
 		'password'=>'text',
 		'name'=>Array("Type"=>'text','charset'=>'utf8'),
 		'avatar'=>'/avatar',
+		'#defdata'=>Array(
+				Array('login'=>'root','name'=>'root','password'=>'123456'),
+				Array('login'=>'vasya','name'=>'Vasya','password'=>'vasya'),
+				Array('login'=>'masha','name'=>'Masha','password'=>'masha'),
+		)
 ));
 $mydb->scheme->add('group',Array(
 		'name'=>'text',
@@ -54,16 +59,18 @@ $mydb->scheme->add('article',Array(
 		'name'=>'text',
 		'autor'=>'#user.id',
 		'atext'=>'memo',
-		'date'=>'datetime',
-));
+		'date'=>'datetime',				
+	)
+		
+);
 //var_dump($mydb->scheme);  //
 //$_QDEBUG =TRUE;
-$mydb->commit();
 
+/*
 $mydb->scheme->insert('user',Array(
 		Array('login'=>'root','name'=>'root','password'=>'123456'),
 		Array('login'=>'vasya','name'=>'Vasya','password'=>'vasya'),
 		Array('login'=>'masha','name'=>'Masha','password'=>'masha'),
 )
-)->exe();
+)->exe();*/
 ?>

@@ -35,7 +35,9 @@ abstract class DBDriver {
 	abstract function q_update($upd_data);
 	// get the table structure
 	abstract function getTableStruct($tblname);
-	
+	// write default data to tables
+	abstract function WriteDefData($defdata=NULL);
+	// get the row of result
 	abstract function res_row($res);
 	
 	abstract function CommitBindings();
