@@ -134,6 +134,7 @@ class QMan
 				break;
 			case "add" :
 				$this->_ADD_ARGS = $this->preprocess_add($this->_ADD_ARGS);
+				mutex_wait("add_".$this->_ADD_ARGS['table']);
 				$q = $this->_DRV->q_add($this->_ADD_ARGS);
 				//var_dump($q);
 				break;
@@ -156,7 +157,30 @@ class QMan
 		
 		if($params!=NULL)
 			$q = $this->make_params($q, $params);
-		return $this->_DRV->exe_query($q);
+		$qres = $this->_DRV->exe_query($q);
+		
+		switch($this->mode)
+		{
+			case "select" :
+				
+				break;
+			case "update" :
+				
+				break;
+			case "add" :
+				
+				$qres = $this->_DRV->last_added_ids($this->_ADD_ARGS['table']);
+				mutex_free("add_".$this->_ADD_ARGS['table']);
+				//var_dump($q);
+				break;
+			case "delete" :
+			
+				break;
+			case "deleteitem" :
+				
+				break;
+		}
+		return $qres;
 	}
 	
 	function make_params($sql,$params)

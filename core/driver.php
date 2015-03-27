@@ -39,6 +39,8 @@ abstract class DBDriver {
 	abstract function WriteDefData($defdata=NULL);
 	// get the row of result
 	abstract function res_row($res);
+	// id's of last added items 
+	abstract function last_added_ids($table);
 	
 	abstract function CommitBindings();
 	// Commit data table

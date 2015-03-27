@@ -66,6 +66,14 @@ while($row=$mydb->scheme->res_row($res))
 	var_dump($row);
 }
 */
+
+	$ids = $mydb->scheme->insert('user',Array(
+			Array('login'=>'petya','name'=>'petya','password'=>'123456'),
+			Array('login'=>'valya','name'=>'Valya','password'=>'valya'),
+			
+	)
+	)->exe();
+	var_dump($ids);
 	
 	$res = $mydb->scheme->select('project',Array(
 			'name',

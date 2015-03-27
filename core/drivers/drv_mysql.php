@@ -334,8 +334,19 @@ ON DELETE ".$bind_data['on_delete']." ON UPDATE ".$bind_data['on_update']."";
 		//var_dump($arr);
 		return $arr;
 	}
-	
-
+	// id's of last added records
+	function last_added_ids($table)
+	{
+		$lastid = mysql_insert_id();
+		$q = "SELECT id FROM `{$this->_PREFIX}$table` WHERE id>=$lastid";
+		$res = $this->exe_query($q);
+		$ids = Array();
+		while($row = $this->res_row($res))
+		{
+			$ids[]=$row['id'];
+		}
+		return $ids;
+	}
 	
 	function exe_query($q,$exept=true)
 	{
