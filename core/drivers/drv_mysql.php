@@ -78,6 +78,7 @@ class DBD_Mysql extends DBDriver
 			{
 				$where = "";
 				$i=0;
+				
 				foreach ($dditem as $fld => $val)
 				{
 					if($i) 
@@ -86,6 +87,7 @@ class DBD_Mysql extends DBDriver
 					$i++;
 				}
 				$qselect = "SELECT * FROM {$this->_PREFIX}".$nfo['key']." WHERE $where";
+				//echo ">>> $qselect";
 				$res_select = $this->exe_query($qselect);
 				$selcount = $this->res_count($res_select);
 				// if exists - delete
@@ -97,15 +99,16 @@ class DBD_Mysql extends DBDriver
 		
 			
 			// no such data
-			
-		$q = $this->q_add(
-					Array(
-						'table'=>$nfo['key'],
-						'data'=>$nfo['defdata'],
-					)
-				);
-		$this->exe_query($q);
-			
+			if(count($nfo['defdata']))
+			{
+				$q = $this->q_add(
+							Array(
+								'table'=>$nfo['key'],
+								'data'=>$nfo['defdata'],
+							)
+						);
+				$this->exe_query($q);
+			}
 		}
 	}
 	
