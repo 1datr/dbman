@@ -44,6 +44,8 @@ class DBSTable {
 	
 	function normalized_field($info)
 	{
+		GLOBAL $_DEF_CHARSET;
+		GLOBAL $_DEF_SUBCHARSET;
 		$typeinfo = Array();
 		$typeinfo['Type']='INT';
 		$typeinfo["Default"]=NULL;
@@ -96,6 +98,14 @@ class DBSTable {
 		$sinonims = Array("string"=>"text","memo"=>"longtext","logic"=>"BOOLEAN","logical"=>"BOOLEAN");// datatype synonims
 		if(!empty($sinonims[$typeinfo['Type']]))
 			$typeinfo['Type'] = $sinonims[$typeinfo['Type']];
+		
+		$texttypes=Array('text','tinytext','longtext','mediumtext');
+		if(in_array($typeinfo['Type'],$texttypes) && ($typeinfo['charset']=='') )
+		{
+			$typeinfo['charset']=$_DEF_CHARSET;
+			$typeinfo["sub_charset"]=$_DEF_SUBCHARSET;
+		}
+		
 		// control
 		if($typeinfo['Type']=='varchar')
 			$typeinfo['Type']='varchar(20)';

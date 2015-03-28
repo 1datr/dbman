@@ -8,4 +8,6 @@ $QCACHE_DIR = dirName(__FILE__).'/sqlcache';
 $DIR_EXT = dirName(__FILE__).'/../ext';
 // dbman extentions enabled
 $EXT_ENABLE = Array('multilang');
+$_DEF_CHARSET = "utf8"; 
+$_DEF_SUBCHARSET = "utf8_general_ci";
 ?>

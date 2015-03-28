@@ -33,9 +33,63 @@ class DBD_Mysql extends DBDriver
 		return  $fld;
 	}
 	// Create table
-	function CreateTable($TableData)
+	function CreateTable($tblname,$TableData)
 	{ 
-	
+		var_dump($TableData->_FIELDS);
+		//CREATE TABLE
+		$sql = "CREATE TABLE `".$this->_PREFIX.$tblname."` (
+		`id` BIGINT(20) NOT NULL AUTO_INCREMENT,\n";
+		$sqlout = false;
+		foreach ($TableData->_FIELDS as $name => $fld)
+		{
+			$fldinfo = $this->CheckField($fld);
+		
+			if($fldinfo['virtual']) continue;
+		
+			$charsetstr = "";
+			if($fldinfo['charset']!="")
+			{
+				$charsetstr = "CHARACTER SET {$fldinfo['charset']} COLLATE {$fldinfo['sub_charset']}";
+				$sqlout=true;
+			}
+			$nullstr = ($fldinfo['Null']=="NO") ? "Not null" : "Null";
+			if($fldinfo['Default']==NULL)
+				$fldstr = "`$name` ".$fldinfo['Type']." $charsetstr ".$nullstr;
+			else
+				$fldstr = "`$name` ".$fldinfo['Type']." $charsetstr Default ".$fldinfo['Default']." ".$nullstr;
+		
+			
+			$sql = $sql."$fldstr,\n";
+				
+		}
+		$sql = $sql."
+	PRIMARY KEY(`id`)
+	)";
+		global $_QDEBUG;
+		if($_QDEBUG)
+			echo "[".__LINE__."]".$sql."<br/>";
+		$this->dbg(__LINE__,$sql);
+		
+		$this->exe_query($sql);
+			
+		foreach ($TableData->_FIELDS as $name => $fld)
+		{
+			if(!empty($fld['bind']))
+				$this->_BINDINGS[]=Array(
+						'tblname'=>$tblname,
+						'field'=>$name,
+						'bind_data'=>$fld['bind'],
+				);
+				//$this->create_binding($tblname, $name, $fldinfo['bind']);
+		}
+			
+			
+			
+		//Set the default values
+		foreach ($fldinfo['defdata'] as $d)
+		{
+		
+		}
 	}
 	
 	function dbg($_LINE,$sql)
@@ -168,7 +222,10 @@ class DBD_Mysql extends DBDriver
 				{
 					echo "fldinfo:";
 					var_dump($fldinfo);
-				}*/
+				}
+				
+				ALTER TABLE  `tdb_language` CHANGE  `full`  `full` TEXT CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL ;
+				*/
 				
 				if(!$fldinfo['virtual'])
 				{
@@ -553,52 +610,7 @@ ON DELETE ".$bind_data['on_delete']." ON UPDATE ".$bind_data['on_update']."";
 		}
 		else 
 		{
-		//	var_dump($TableData->_FIELDS);
-			//CREATE TABLE
-			$sql = "CREATE TABLE `".$this->_PREFIX.$tblname."` (
-		`id` BIGINT(20) NOT NULL AUTO_INCREMENT,\n";
-			foreach ($TableData->_FIELDS as $name => $fld)
-			{
-				$fldinfo = $this->CheckField($fld);
-				
-				if($fldinfo['virtual']) continue;
-				
-				$nullstr = ($fldinfo['Null']=="NO") ? "Not null" : "Null";
-				if($fldinfo['Default']==NULL)
-					$fldstr = "`$name` ".$fldinfo['Type']." ".$nullstr;
-				else
-					$fldstr = "`$name` ".$fldinfo['Type']." Default ".$fldinfo['Default']." ".$nullstr;
-				
-				$sql = $sql."$fldstr,\n";
-			
-			}
-			$sql = $sql."
-	PRIMARY KEY(`id`)
-	)";
-			global $_QDEBUG;
-			if($_QDEBUG)
-				echo "[".__LINE__."]".$sql."<br/>";
-			$this->dbg(__LINE__,$sql);
-			$this->exe_query($sql);
-			
-			foreach ($TableData->_FIELDS as $name => $fld)
-			{
-				if(!empty($fld['bind']))
-					$this->_BINDINGS[]=Array(
-							'tblname'=>$tblname, 
-							'field'=>$name, 
-							'bind_data'=>$fld['bind'],
-							);
-					//$this->create_binding($tblname, $name, $fldinfo['bind']);
-			}
-			
-			
-			
-			//Set the default values
-			foreach ($fldinfo['defdata'] as $d)
-			{
-				
-			}
+			$this->CreateTable($tblname,$TableData);
 		}
 	}
 	

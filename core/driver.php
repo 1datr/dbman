@@ -8,7 +8,7 @@ abstract class DBDriver {
 	// Disconnect from db
 	abstract function Disonnect($disconnectvar=NULL);
 	// Create table
-	abstract function CreateTable($TableData);
+	abstract function CreateTable($tblname,$TableData);
 	// Change table
 	abstract function ChangeTable($tblname,$TableData);
 	// Delete table
