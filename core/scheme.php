@@ -44,13 +44,13 @@ class DBScheme extends QMan
 			{
 				require_once "$DIR_EXT/$idx/index.php";
 				$extclassname="DBMExt".strtolower($idx);
-				$this->EXTBUF[]=new $extclassname($ext);
+				$this->_EXTBUF[]=new $extclassname($ext);
 			}
 			else // load without params
 			{
 				require_once "$DIR_EXT/$ext/index.php";
 				$extclassname="DBMExt".strtolower($ext);
-				$this->EXTBUF[]=new $extclassname();
+				$this->_EXTBUF[]=new $extclassname();
 			}	
 		}
 	}
