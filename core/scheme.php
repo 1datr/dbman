@@ -71,6 +71,11 @@ class DBScheme extends QMan
 		$this->load_extentions();
 		
 	}
+	// object exists
+	function obj_exist($objname)
+	{
+		return !empty($this->_SCHEME[$objname]);
+	}
 	
 	function add($objname,$obj_params=NULL,$objtype=DSOT_DB)
 	{
