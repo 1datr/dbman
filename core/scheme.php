@@ -25,6 +25,7 @@ class DBScheme extends QMan
 	
 	function exe_event($event,$args=NULL)
 	{
+		$args['scheme']=&$this;
 		foreach ($this->_EXTBUF as $idx => $ext)
 		{
 			$evname = "on_$event";
