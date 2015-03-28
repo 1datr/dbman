@@ -37,11 +37,21 @@ class DBScheme extends QMan
 	{
 		$this->_EXTBUF=Array();
 		GLOBAL $DIR_EXT;
-		foreach ($EXT_ENABLE as $ext)
+		GLOBAL $EXT_ENABLE;
+		foreach ($EXT_ENABLE as $idx => $ext)
 		{
-			require_once "$DIR_EXT/$ext/index.php";
-			$extclassname="DBMExt".strtolower($ext);
-			$this->EXTBUF[]=new $extclassname();
+			if(is_string($idx))
+			{
+				require_once "$DIR_EXT/$idx/index.php";
+				$extclassname="DBMExt".strtolower($idx);
+				$this->EXTBUF[]=new $extclassname($ext);
+			}
+			else // load without params
+			{
+				require_once "$DIR_EXT/$ext/index.php";
+				$extclassname="DBMExt".strtolower($ext);
+				$this->EXTBUF[]=new $extclassname();
+			}	
 		}
 	}
 	
@@ -65,7 +75,13 @@ class DBScheme extends QMan
 	{
 		switch ($objtype)
 		{
-			case DSOT_DB: 
+			case DSOT_DB:
+					// event before add table 
+					$this->exe_event('before_add_table',
+							Array(
+								'table'=>$objname,
+								'fields'=>&$obj_params,
+								));
 					if(xarray_key_exists('#defdata', $obj_params))
 					{
 						$_keys = array_keys($obj_params['#defdata']);
@@ -84,6 +100,12 @@ class DBScheme extends QMan
 					}
 					else 
 						$this->_SCHEME[$objname] = new DBSTable($objname,$obj_params);
+					// event after add table
+					$this->exe_event('after_add_table',
+							Array(
+									'table'=>$objname,
+									'fields'=>&$obj_params,
+							));
 				break;
 			case DSOT_VIEW:
 				
