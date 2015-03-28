@@ -15,11 +15,34 @@ class DBScheme extends QMan
 	
 	VAR $_SCHEME = Array();
 	VAR $_DRV = null;
+	VAR $_EXTBUF = Array();
 	
 	function setdriver(&$drv)
 	{
 		$this->_DRV = $drv;
 		
+	}
+	
+	function exe_event($event,$args=NULL)
+	{
+		foreach ($this->_EXTBUF as $idx => $ext)
+		{
+			$evname = "on_$event";
+			if(method_exists($ext,$evname))
+				$ext->$evname($args);
+		}
+	}
+	// load all extentions	
+	function load_extentions()
+	{
+		$this->_EXTBUF=Array();
+		GLOBAL $DIR_EXT;
+		foreach ($EXT_ENABLE as $ext)
+		{
+			require_once "$DIR_EXT/$ext/index.php";
+			$extclassname="DBMExt".strtolower($ext);
+			$this->EXTBUF[]=new $extclassname();
+		}
 	}
 	
 	function  __construct($dbscheme=NULL)
@@ -33,6 +56,9 @@ class DBScheme extends QMan
 			$this->_SCHEME = $dbscheme;
 		else
 			throw new Exception("Wrong datascheme");
+		
+		$this->load_extentions();
+		
 	}
 	
 	function add($objname,$obj_params=NULL,$objtype=DSOT_DB)

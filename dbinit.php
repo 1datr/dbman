@@ -58,7 +58,7 @@ $mydb->scheme->add('mail',Array(
 $mydb->scheme->add('article',Array(
 		'name'=>'text',
 		'autor'=>'#user.id',
-		'atext'=>'memo',
+		'/ml:atext'=>'memo',
 		'date'=>'datetime',				
 	)
 		
