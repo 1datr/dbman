@@ -1,6 +1,7 @@
 <?php 
 // Расширение dbman
 class DBMExtMultilang extends DBMExtention{
+	// event before adding new table
 	function on_before_add_table($args)
 	{
 		
@@ -36,6 +37,12 @@ class DBMExtMultilang extends DBMExtention{
 				}
 			}
 		}
+	}
+	
+	// event on query
+	function on_before_query($args)
+	{
+		
 	}
 }
 ?>

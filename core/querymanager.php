@@ -7,6 +7,54 @@ class QMan
 	VAR $_UPDATE_ARGS=Array();
 	VAR $_DELETE_ARGS=Array();
 	VAR $_DELITEM_ARGS=Array();
+	// get current arguments
+	function get_current_args()
+	{
+		$_ARGS = Array();
+		$_ARGS['mode']=$this->mode;
+		switch($this->mode)
+		{
+			case 'select':
+					$_ARGS['args']=$this->_SELECT_ARGS;
+				break;
+			case 'update':
+					$_ARGS['args']=$this->_ADD_ARGS;
+				break;
+			case 'add':
+					$_ARGS['args']=$this->_UPDATE_ARGS;
+				break;
+			case 'delete':
+					$_ARGS['args']=$this->_DELETE_ARGS;
+				break;
+			case 'deleteitem':
+					$_ARGS['args']=$this->_DELITEM_ARGS;
+				break;
+		}
+		return $_ARGS;
+	}
+	// set arguments
+	function set_args($_args)
+	{
+		$this->mode = $_args['mode'];
+		switch($_args['mode'])
+		{
+			case 'select':
+					$this->_SELECT_ARGS = $_ARGS['args'];
+				break;
+			case 'update':
+					$this->_ADD_ARGS = $_ARGS['args'];
+				break;
+			case 'add':
+					$this->_UPDATE_ARGS = $_ARGS['args'];
+				break;
+			case 'delete':
+					$this->_DELETE_ARGS = $_ARGS['args'];
+				break;
+			case 'deleteitem':
+					$this->_DELITEM_ARGS = $_ARGS['args'];
+				break;
+		}
+	}
 	// =
 	function op($param,$val,$op)
 	{
