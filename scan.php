@@ -14,6 +14,7 @@ $mydb = new db($connection);
 $ser_file = './svan21.ser';
 $_marker_file = "./.lift";
 
-$mydb->scheme->scandb();
+$mydb->scheme->scandb(true);
+var_dump($mydb->scheme);
 $mydb->scheme->export('./svancrm.ser');
 ?>

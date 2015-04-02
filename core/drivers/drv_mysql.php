@@ -169,7 +169,7 @@ class DBD_Mysql extends DBDriver
 	function DeleteConstraint($tbl,$ckey)
 	{
 		$query = "ALTER TABLE `".$this->_PREFIX.$tbl."` DROP FOREIGN KEY $ckey ";
-		$this->exe_query($query);
+		$this->exe_query($query,false);
 	}
 	// Get rows of the table
 	function GetTableRows($tbl)
