@@ -8,6 +8,10 @@ $mydb->scheme->add('user',Array(
 				Array('login'=>'root','name'=>'root','password'=>'123456'),
 				Array('login'=>'vasya','name'=>'Vasya','password'=>'vasya'),
 				Array('login'=>'masha','name'=>'Masha','password'=>'masha'),
+				Array('login'=>'grisha','name'=>'grisha','password'=>'grisha'),
+				Array('login'=>'pasha','name'=>'pasha','password'=>'pasha'),
+				Array('login'=>'sasha','name'=>'sasha','password'=>'sasha'),
+				Array('login'=>'dasha','name'=>'dasha','password'=>'dasha'),
 		)
 ));
 $mydb->scheme->add('group',Array(

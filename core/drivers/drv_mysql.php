@@ -7,8 +7,20 @@ class DBD_Mysql extends DBDriver
 {
 	var $_LINK;
 	var $_PREFIX;
-	// Connect to server
-	function Connect($connData)
+	
+		
+	// Select database
+	function SelectDB($dbname)
+	{
+		if(mysql_select_db($dbname,$this->_LINK))
+		{
+			$this->currentdb = $dbname;
+			return true;
+		}
+		return false;
+	}
+	
+	function ConnectDBServer($connData)
 	{
 		if(!is_array($connData)) $connData=Array();
 		if(empty($connData['server'])) $connData['server']='localhost';
@@ -16,16 +28,21 @@ class DBD_Mysql extends DBDriver
 		if(empty($connData['password'])) $connData['password']='';
 		$this->_LINK= mysql_pconnect($connData['server'], $connData['user'], $connData['password'])
 		or die("Could not connect: " . mysql_error());
-		
-		$this->_PREFIX=$connData['prefix'];
-		if(mysql_select_db($connData['dbname'],$this->_LINK))
-			$this->currentdb = $connData['dbname'];
 	}
+	
 	// Disconnect from db
 	function Disonnect($disconnectvar=NULL)
 	{
 		
-		
+		mysql_disconnect($this->_LINK);
+	}
+	
+	function CreateDB($dbname)
+	{
+		global $_DEF_CHARSET;
+		global $_DEF_SUBCHARSET;
+		$qdbcreate = "CREATE DATABASE  $dbname CHARACTER SET $_DEF_CHARSET COLLATE $_DEF_SUBCHARSET";
+		$this->exe_query($qdbcreate);
 	}
 	
 	function CheckField($fld)
@@ -169,7 +186,7 @@ class DBD_Mysql extends DBDriver
 	function DeleteConstraint($tbl,$ckey)
 	{
 		$query = "ALTER TABLE `".$this->_PREFIX.$tbl."` DROP FOREIGN KEY $ckey ";
-		$this->exe_query($query);
+		$this->exe_query($query,false);
 	}
 	// Get rows of the table
 	function GetTableRows($tbl)

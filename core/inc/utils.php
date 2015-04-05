@@ -34,4 +34,23 @@ function mutex_free($mtxname)
 	@unlink($_mtx_file);
 }
 
+function xsplit_array($arr, $item_count)
+{
+	$_res = Array();
+	$buf = Array();
+	$i=0;
+	foreach ($arr as $key => $val)
+	{
+		if(is_string($key))
+			$buf[$key]=$val;
+		else 
+			$buf[]=$val;
+		$i++;
+		$i%=$item_count;
+		if($i==0)
+			$_res[]=$buf;
+	}
+	return $_res;
+}
+
 ?>

@@ -183,7 +183,21 @@ class QMan
 			case "add" :
 				$this->_ADD_ARGS = $this->preprocess_add($this->_ADD_ARGS);
 				mutex_wait("add_".$this->_ADD_ARGS['table']);
-				$q = $this->_DRV->q_add($this->_ADD_ARGS);
+				GLOBAL $_MAX_COUNT_IN_ADDBLOCK;
+				if(count($this->_ADD_ARGS['data'])>$_MAX_COUNT_IN_ADDBLOCK )
+				{
+					$_BUF = xsplit_array($this->_ADD_ARGS['data'], $_MAX_COUNT_IN_ADDBLOCK);
+					$q = Array();
+					foreach($_BUF as $_ITEM)
+					{
+						$this->_ADD_ARGS['data']=$_ITEM;
+						$q[] = $this->_DRV->q_add($this->_ADD_ARGS);
+					}
+				}
+				else 
+				{
+					$q = $this->_DRV->q_add($this->_ADD_ARGS);
+				}
 				//var_dump($q);
 				break;
 			case "delete" :
@@ -203,10 +217,20 @@ class QMan
 			file_put_contents($filename, $q);
 		}
 		
-		if($params!=NULL)
-			$q = $this->make_params($q, $params);
-		$qres = $this->_DRV->exe_query($q);
-		
+		if(is_array($q)) // if $q is array
+		{
+			$qres = Array();
+			foreach ($q as $qitem)
+			{
+				$qres[] = $this->_DRV->exe_query($qitem);
+			}
+		}
+		else 
+		{
+			if($params!=NULL)
+				$q = $this->make_params($q, $params);
+			$qres = $this->_DRV->exe_query($q);
+		}
 		switch($this->mode)
 		{
 			case "select" :

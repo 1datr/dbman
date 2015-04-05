@@ -141,8 +141,8 @@ class DBScheme extends QMan
 			
 		}		
 	}
-	// scan database and make datascheme
-	function scandb()
+	// scan database structure and make datascheme
+	function scandb($scan_data=false)
 	{
 		$res = $this->_DRV->TableList();
 	//	var_dump($res);
@@ -164,6 +164,17 @@ class DBScheme extends QMan
 						
 				);
 
+			}
+			if($scan_data)
+			{
+				$fldlist['#defdata']=$this->_DRV->GetTableRows($tbl);
+			}
+			else 
+			{
+				if(xarray_key_exists($tbl, $scan_data))
+				{
+					$fldlist['#defdata']=$this->_DRV->GetTableRows($tbl);
+				}
 			}
 			$this->add($tbl,$fldlist);
 				
