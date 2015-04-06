@@ -23,38 +23,7 @@ class DBScheme extends QMan
 		
 	}
 	
-	function exe_event($event,$args=NULL)
-	{
-		$args['scheme']=&$this;
-		foreach ($this->_EXTBUF as $idx => $ext)
-		{
-			$evname = "on_$event";
-			if(method_exists($ext,$evname))
-				$ext->$evname($args);
-		}
-	}
-	// load all extentions	
-	function load_extentions()
-	{
-		$this->_EXTBUF=Array();
-		GLOBAL $DIR_EXT;
-		GLOBAL $EXT_ENABLE;
-		foreach ($EXT_ENABLE as $idx => $ext)
-		{
-			if(is_string($idx))
-			{
-				require_once "$DIR_EXT/$idx/index.php";
-				$extclassname="DBMExt".strtolower($idx);
-				$this->_EXTBUF[]=new $extclassname($ext);
-			}
-			else // load without params
-			{
-				require_once "$DIR_EXT/$ext/index.php";
-				$extclassname="DBMExt".strtolower($ext);
-				$this->_EXTBUF[]=new $extclassname();
-			}	
-		}
-	}
+	
 	
 	function  __construct($dbscheme=NULL)
 	{

@@ -4,7 +4,23 @@ abstract class DBDriver {
 	
 	VAR $currentdb;
 	// Connect to server
-	abstract function Connect($connData);
+	function Connect($connData)
+	{
+		$this->ConnectDBServer($connData);
+		
+		$this->_PREFIX=$connData['prefix'];
+		
+		if(!$this->SelectDB($connData['dbname']))
+		{
+			global $_AUTO_CREATE_DB;
+			if($_AUTO_CREATE_DB)
+				$this->CreateDB($connData['dbname']);
+		}
+	}
+	// Select database
+	abstract function SelectDB($dbname);
+	
+	abstract function ConnectDBServer($connData);
 	// Disconnect from db
 	abstract function Disonnect($disconnectvar=NULL);
 	// Create table
@@ -15,6 +31,8 @@ abstract class DBDriver {
 	abstract function DeleteTable($tblname);
 	// Select queries
 	abstract function Select($selectdata);
+	// create database
+	abstract function CreateDB($dbname);
 	
 	abstract function GetTableRows($tbl);
 	// Commit data table

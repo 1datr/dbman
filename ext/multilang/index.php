@@ -42,7 +42,80 @@ class DBMExtMultilang extends DBMExtention{
 	// event on query
 	function on_before_query($args)
 	{
-		
+		switch ($args['qmode'])
+		{
+			case 'select':
+					$this->on_select($args);
+				break;
+			case 'update': 
+					$this->on_update($args);
+				break;
+			case 'add': 
+					$this->on_add($args);
+				break;
+			case 'delete': 
+					$this->on_delete($args);
+				break;
+			case 'delitem': 
+					$this->on_delitem($args);
+				break;
+		}
 	}
+	
+	function on_select(&$args)
+	{
+		global $_CURR_LANGUAGE;
+		foreach($args['args']['select'] as $idx => $val)
+		{
+			$matches = Array();
+			// \ml:field
+			if(preg_match_all("|[\\/]{0,1}ml\:(.+)|",$val,$matches))
+			{
+				
+			}
+			// \ml:field[ru]
+			elseif(preg_match_all("|[\\/]{0,1}ml\:(.+)\[(.+)\]|",$val,$matches))
+			{
+				
+			}
+			
+		}
+	}
+	
+	function on_update(&$args)
+	{
+		global $_CURR_LANGUAGE;
+		foreach($args['args'] as $idx => $val)
+		{
+				
+		}
+	}
+	
+	function on_add(&$args)
+	{
+		global $_CURR_LANGUAGE;
+		foreach($args['args'] as $idx => $val)
+		{
+				
+		}
+	}
+	
+	function on_delete(&$args)
+	{
+		global $_CURR_LANGUAGE;
+		foreach($args['args'] as $idx => $val)
+		{
+				
+		}
+	}
+	
+	function on_delitem(&$args)
+	{
+		global $_CURR_LANGUAGE;
+		foreach($args['args'] as $idx => $val)
+		{
+				
+		}
+	}	
 }
 ?>
