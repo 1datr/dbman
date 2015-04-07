@@ -39,6 +39,7 @@ class DBSTable {
 	{
 		foreach($this->_FIELDS as $fld => &$finfo)
 		{
+			
 			if($fld=='#defdata')
 			{
 				$this->_DEFDATA = $this->_FIELDS[$fld];
@@ -63,7 +64,7 @@ class DBSTable {
 				"charset"=>"","sub_charset"=>"","virtual"=>FALSE);
 		$infostr ="";
 		if(is_string($info))
-			$infostr = $info;
+			$infostr = "$info";
 		// make array if is not array
 		if(!is_array($info))
 			$info=Array();

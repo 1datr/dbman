@@ -79,7 +79,7 @@ class DBD_Mysql extends DBDriver
 		foreach ($TableData->_FIELDS as $name => $fld)
 		{
 			
-			if(!$fldinfo['virtual'])
+			if(!$fld['virtual'])
 			{	
 				$fld_code_buf[]=$this->GetFieldStr($fld,$name);					
 			}

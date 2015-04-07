@@ -35,6 +35,11 @@ class DBMExtMultilang extends DBMExtention{
 						)
 					);
 				}
+				
+				if(is_string($args['fields'][$fld])) 
+					$args['fields'][$fld]="/".$args['fields'][$fld];
+				elseif(is_array($args['fields'][$fld]))
+					$args['fields'][$fld]['virtual']=true;
 			}
 		}
 	}
