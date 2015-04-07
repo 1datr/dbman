@@ -9,8 +9,7 @@ class DBMExtMultilang extends DBMExtention{
 		{
 			$matches = Array();
 			if(preg_match_all("|[\\/]{0,1}ml\:(.+)|",$fld,$matches))
-			{
-				echo "ML:";
+			{				
 				$own_fld_name=$matches[1][0];
 				// add languages table if not exists
 				if(!$args['scheme']->obj_exist('language'))
@@ -30,6 +29,7 @@ class DBMExtMultilang extends DBMExtention{
 				if(!$args['scheme']->obj_exist($mltable_name))
 				{
 					$args['scheme']->add($mltable_name,Array(
+							'recid'=>"#".$args['table'].".id",
 							'lang'=>'#language.id',
 							'text'=>$fldinfo,
 						)
@@ -71,12 +71,22 @@ class DBMExtMultilang extends DBMExtention{
 			// \ml:field
 			if(preg_match_all("|[\\/]{0,1}ml\:(.+)|",$val,$matches))
 			{
-				
+				$fldname = $matches[1][0];
+				$tblname = $args['args']['table']."_$fldname";
+				// delete the field
+				$args['scheme']->join(Array(
+						'from'=>Array('table'=>$args['args']['table'], 'field'=>'id'),
+						'to'=>Array('table'=>$tblname, 'field'=>'recid')
+						)
+				);
+				unset($args['args']['select'][$idx]);
 			}
 			// \ml:field[ru]
 			elseif(preg_match_all("|[\\/]{0,1}ml\:(.+)\[(.+)\]|",$val,$matches))
 			{
 				
+				// delete the field
+				unset($args['args']['select'][$idx]);
 			}
 			
 		}

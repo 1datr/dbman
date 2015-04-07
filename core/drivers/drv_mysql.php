@@ -42,6 +42,7 @@ class DBD_Mysql extends DBDriver
 		global $_DEF_CHARSET;
 		global $_DEF_SUBCHARSET;
 		$qdbcreate = "CREATE DATABASE  $dbname CHARACTER SET $_DEF_CHARSET COLLATE $_DEF_SUBCHARSET";
+		
 		$this->exe_query($qdbcreate);
 	}
 	
@@ -49,37 +50,43 @@ class DBD_Mysql extends DBDriver
 	{
 		return  $fld;
 	}
+	
+	function GetFieldStr($fldinfo,$name)
+	{
+		$fldstr = "";
+		$charsetstr = "";
+		if($fldinfo['charset']!="")
+		{
+			$charsetstr = "CHARACTER SET {$fldinfo['charset']} COLLATE {$fldinfo['sub_charset']}";
+			$sqlout=true;
+		}
+		$nullstr = ($fldinfo['Null']=="NO") ? "Not null" : "Null";
+		if($fldinfo['Default']==NULL)
+			$fldstr = "`$name` ".$fldinfo['Type']." $charsetstr ".$nullstr;
+		else
+			$fldstr = "`$name` ".$fldinfo['Type']." $charsetstr Default ".$fldinfo['Default']." ".$nullstr;
+		return $fldstr;
+	}
 	// Create table
 	function CreateTable($tblname,$TableData)
 	{ 
-		var_dump($TableData->_FIELDS);
+	//	var_dump($TableData->_FIELDS);
 		//CREATE TABLE
 		$sql = "CREATE TABLE `".$this->_PREFIX.$tblname."` (
 		`id` BIGINT(20) NOT NULL AUTO_INCREMENT,\n";
 		$sqlout = false;
+		$fld_code_buf = Array();
 		foreach ($TableData->_FIELDS as $name => $fld)
 		{
-			$fldinfo = $this->CheckField($fld);
-		
-			if($fldinfo['virtual']) continue;
-		
-			$charsetstr = "";
-			if($fldinfo['charset']!="")
-			{
-				$charsetstr = "CHARACTER SET {$fldinfo['charset']} COLLATE {$fldinfo['sub_charset']}";
-				$sqlout=true;
-			}
-			$nullstr = ($fldinfo['Null']=="NO") ? "Not null" : "Null";
-			if($fldinfo['Default']==NULL)
-				$fldstr = "`$name` ".$fldinfo['Type']." $charsetstr ".$nullstr;
-			else
-				$fldstr = "`$name` ".$fldinfo['Type']." $charsetstr Default ".$fldinfo['Default']." ".$nullstr;
-		
 			
-			$sql = $sql."$fldstr,\n";
-				
+			if(!$fldinfo['virtual'])
+			{	
+				$fld_code_buf[]=$this->GetFieldStr($fld,$name);					
+			}
 		}
-		$sql = $sql."
+		$sql = $sql.implode(",",$fld_code_buf)." \n";
+		
+		$sql = $sql.",
 	PRIMARY KEY(`id`)
 	)";
 		global $_QDEBUG;
@@ -425,7 +432,19 @@ ON DELETE ".$bind_data['on_delete']." ON UPDATE ".$bind_data['on_update']."";
 	function exe_query($q,$exept=true)
 	{
 		global $_QSKIP;
+		global $_QFILEDUMP;
 		$res = mysql_query($q,$this->_LINK);
+		if($_QFILEDUMP)
+		{
+			if(!file_exists('.query'))
+				$_text = "";
+			else
+				$_text = file_get_contents('.query');
+			$_text = "$_text
+			
+			$q";
+			file_put_contents('.query',$_text);
+		}
 		if($exept && !$_QSKIP)
 		{
 			if($res==FALSE)

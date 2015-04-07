@@ -37,87 +37,88 @@ class DBSTable {
 	
 	function normalize()
 	{
-		foreach($this->_FIELDS as $fld => $finfo)
-			$this->_FIELDS[$fld] = $this->normalized_field($finfo);
+		foreach($this->_FIELDS as $fld => &$finfo)
+		{
+			if($fld=='#defdata')
+			{
+				$this->_DEFDATA = $this->_FIELDS[$fld];
+				unset($this->_FIELDS[$fld]);
+			}
+			else
+				$this->normalize_field($finfo);
+			
+		}
+		
+		
 	}
 	
 	
-	function normalized_field($info)
+	function normalize_field(&$info)
 	{
+		// NEW CODE
 		GLOBAL $_DEF_CHARSET;
 		GLOBAL $_DEF_SUBCHARSET;
-		$typeinfo = Array();
-		$typeinfo['Type']='INT';
-		$typeinfo["Default"]=NULL;
-		$typeinfo["Null"]="NO";
-		$typeinfo["charset"]='';
-		$typeinfo["sub_charset"]='';
-		$typeinfo["defdata"]=Array();
-		$typeinfo["virtual"]=FALSE;	// the field is virtual
-		//$typeinfo['bind']=NULL;
-	
+		
+		$deffields = Array('Type'=>'INT',"Default"=>NULL,"Null"=>"NO",
+				"charset"=>"","sub_charset"=>"","virtual"=>FALSE);
+		$infostr ="";
 		if(is_string($info))
+			$infostr = $info;
+		// make array if is not array
+		if(!is_array($info))
+			$info=Array();
+		
+		foreach($deffields as $fld => $val)
 		{
-			if($info[0]=='#')
+			if(!xarray_key_exists($info, $fld))
+				$info[$fld]=$val;
+		}
+		
+		if($infostr!="")
+		{
+			if($infostr[0]=='#')
 			{
-				$typeinfo['Type']='bigint';
-				$info = substr($info,1);
-				$arr = explode('.', $info);
+				$info['Type']='bigint';
+				$_info = substr($infostr,1);
+				$arr = explode('.', $_info);
 				//	var_dump($arr);
-				$typeinfo['bind']=Array('table_to'=>$arr[0],
+				$info['bind']=Array('table_to'=>$arr[0],
 						'field_to'=>$arr[1],
 						'on_delete'=>'RESTRICT',
 						'on_update'=>'RESTRICT');
 			}
-			elseif($info[0]=='/') // &fld - virtual field
+			elseif($infostr[0]=='/' || $infostr[0]=='\\') // &fld - virtual field
 			{
-				$typeinfo["virtual"]=TRUE;
+				$info["virtual"]=TRUE;
+				//	echo ">>".$info;
 			}
 			else
-				$typeinfo['Type']=$info;
-				
+				$info['Type']=$infostr;
 		}
-		else
-		{
-			$typeinfo['Type']=$info['Type'];
-			$typeinfo["Default"]=$info["Default"];
-			$typeinfo["charset"]=$info["charset"];
-			$typeinfo["sub_charset"]=$info["sub_charset"];
-			if(!empty($info['defdata']))
-				$typeinfo["defdata"]=$info['defdata'];
-		}
-		//echo "BIND > ";// var_dump($info['bind']);
-		if(xarray_key_exists("virtual",$info))
-		{
-			$typeinfo["virtual"] = $info["virtual"];
-		}
-		if(xarray_key_exists('bind',$info))
-		{
-			$typeinfo['bind']=$info['bind'];
-		}
+		
 		$sinonims = Array("string"=>"text","memo"=>"longtext","logic"=>"BOOLEAN","logical"=>"BOOLEAN");// datatype synonims
-		if(!empty($sinonims[$typeinfo['Type']]))
-			$typeinfo['Type'] = $sinonims[$typeinfo['Type']];
-		
+		if(!empty($sinonims[$info['Type']]))
+			$info['Type'] = $sinonims[$info['Type']];
+			
 		$texttypes=Array('text','tinytext','longtext','mediumtext');
-		if(in_array($typeinfo['Type'],$texttypes) && ($typeinfo['charset']=='') )
+		if(in_array($info['Type'],$texttypes) && ($info['charset']=='') )
 		{
-			$typeinfo['charset']=$_DEF_CHARSET;
-			$typeinfo["sub_charset"]=$_DEF_SUBCHARSET;
+			$info['charset']=$_DEF_CHARSET;
+			$info["sub_charset"]=$_DEF_SUBCHARSET;
 		}
-		
-		// control
-		if($typeinfo['Type']=='varchar')
-			$typeinfo['Type']='varchar(20)';
+			
+			// control
+		if($info['Type']=='varchar')
+			$info['Type']='varchar(20)';
 		$notdefault = Array('varchar','text');
-		if(in_array($typeinfo['Type'], $notdefault))
-			$typeinfo["Default"]=NULL;
+		if(in_array($info['Type'], $notdefault))
+			$info["Default"]=NULL;
 		// collation
-		if(($typeinfo["charset"]=="utf8") && ($typeinfo["sub_charset"]==""))
-			$typeinfo["sub_charset"]="utf8_general_ci";
+		if(($info["charset"]=="utf8") && ($info["sub_charset"]==""))
+			$info["sub_charset"]="utf8_general_ci";
 		
-		//
-		return $typeinfo;
+		
+		var_dump($info);	
 	}
 	
 	

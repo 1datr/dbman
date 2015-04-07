@@ -45,7 +45,7 @@ class DBScheme extends QMan
 	{
 		return !empty($this->_SCHEME[$objname]);
 	}
-	
+	// add data query
 	function add($objname,$obj_params=NULL,$objtype=DSOT_DB)
 	{
 		switch ($objtype)

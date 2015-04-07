@@ -6,4 +6,5 @@ $connection=Array(
 		'dbname'=>'dbmantest',
 		'prefix'=>'tdb_'
 );
+$_CURR_LANGUAGE='en';
 ?>

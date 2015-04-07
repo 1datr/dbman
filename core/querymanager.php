@@ -438,17 +438,17 @@ class QMan
 		$prepr->preprocess_addjoin($joinarg,$this->_SELECT_ARGS);
 	}
 	// add group argument
-		function group($group_arg)
-		{
+	function group($group_arg)
+	{
 		if(empty($this->_SELECT_ARGS['group']))
 			$this->_SELECT_ARGS['group']=Array();
 				$this->_SELECT_ARGS['group'][]=$group_arg;
-		}
+	}
 	
 		// get row from result
-		function res_row($res)
-		{
+	function res_row($res)
+	{
 		return $this->_DRV->res_row($res);
-		}
+	}
 }
 ?>

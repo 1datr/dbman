@@ -1,5 +1,5 @@
 <?php 
-
+set_time_limit(0);
 require_once dirName(__FILE__).'/core/index.php';
 $_QDEBUG=FALSE;
 require_once dirName(__FILE__).'/config.php';
@@ -75,7 +75,8 @@ while($row=$mydb->scheme->res_row($res))
 	)->exe();
 	var_dump($ids);
 	
-	$res = $mydb->scheme->select('project',Array(
+	/*
+	 $res = $mydb->scheme->select('project',Array(
 			'name',
 			'user|login as userlogin',			
 			'user|name as username',
@@ -83,6 +84,16 @@ while($row=$mydb->scheme->res_row($res))
 			))->exe(
 					//'q1'
 			);
+	*/
+	$res = $mydb->scheme->select('article',Array(
+			'name',
+			'autor|name',
+			'/ml:atext',
+			
+			//'user|id<groupmember:group',
+	))->exe(
+			//'q1'
+	);
 	while($row=$mydb->scheme->res_row($res))
 	{
 		var_dump($row);
