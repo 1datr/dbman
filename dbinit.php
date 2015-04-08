@@ -32,6 +32,7 @@ $mydb->scheme->add('groupmember',Array(
 		'group'=>'#group.id',
 		'owner'=>'logic'
 ));
+/*
 $mydb->scheme->add('category',Array(
 		'name'=>'text',
 		'user'=>'#user.id',
@@ -67,6 +68,7 @@ $mydb->scheme->add('article',Array(
 	)
 		
 );
+*/
 //var_dump($mydb->scheme);  //
 //$_QDEBUG =TRUE;
 

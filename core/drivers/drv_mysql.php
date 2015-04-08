@@ -384,11 +384,16 @@ class DBD_Mysql extends DBDriver
 		{
 			$this->DeleteConstraint($tblname,$conn['CONSTRAINT_NAME']);
 		}
+		
+		$this->exe_query("ALTER TABLE `{$this->_PREFIX}$tblname` ADD INDEX ( `$field` ) ");
+		 
 		if(empty($bind_data['on_delete']))
 			$bind_data['on_delete']='CASCADE';
 		if(empty($bind_data['on_update']))
 			$bind_data['on_update']='RESTRICT';
+		
 		$keyname = "key_".$tblname."_".$field;
+		
 		$query = "ALTER TABLE `".$this->_PREFIX.$tblname."` 
 ADD CONSTRAINT `$keyname` FOREIGN KEY ( `$field` ) 
 REFERENCES `".$this->_PREFIX.$tblname."` (`".$bind_data['field_to']."`) 
@@ -603,7 +608,7 @@ ON DELETE ".$bind_data['on_delete']." ON UPDATE ".$bind_data['on_update']."";
 		$i = 0;
 		foreach($upd_data['data'] as $col => $val)
 		{
-			if($val[0]=='@')
+			if($val[0]=='@')	// mysql function calling
 			{
 				$val = sustr($val,1);
 				$newelement = "`$col`=$val";
