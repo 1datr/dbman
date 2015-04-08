@@ -84,6 +84,7 @@ class DBMExtMultilang extends DBMExtention{
 						'to'=>Array('table'=>$tblname, 'field'=>'recid')
 						)
 				);
+				$args['scheme']->_SELECT_ARGS['select'][]='$'."$tblname.text";
 				unset($args['args']['select'][$idx]);
 			}
 			// \ml:field[ru]

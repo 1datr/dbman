@@ -11,6 +11,7 @@ $EXT_ENABLE = Array('multilang');
 $_DEF_CHARSET = "utf8"; 
 $_DEF_SUBCHARSET = "utf8_general_ci";
 $_MAX_COUNT_IN_ADDBLOCK = 3;
+$_QDEBUG = false;
 $_AUTO_CREATE_DB = true;
 $_QFILEDUMP = false;
 ?>

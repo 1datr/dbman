@@ -396,7 +396,7 @@ class DBD_Mysql extends DBDriver
 		
 		$query = "ALTER TABLE `".$this->_PREFIX.$tblname."` 
 ADD CONSTRAINT `$keyname` FOREIGN KEY ( `$field` ) 
-REFERENCES `".$this->_PREFIX.$tblname."` (`".$bind_data['field_to']."`) 
+REFERENCES `".$this->_PREFIX.$bind_data['table_to']."` (`".$bind_data['field_to']."`) 
 ON DELETE ".$bind_data['on_delete']." ON UPDATE ".$bind_data['on_update']."";
 		
 		$this->dbg(__LINE__,$query);

@@ -32,7 +32,7 @@ $mydb->scheme->add('groupmember',Array(
 		'group'=>'#group.id',
 		'owner'=>'logic'
 ));
-
+/*
 $mydb->scheme->add('category',Array(
 		'name'=>'text',
 		'user'=>'#user.id',
@@ -59,7 +59,7 @@ $mydb->scheme->add('mail',Array(
 		'message'=>'memo',
 		'date'=>'datetime',
 ));
-
+*/
 $mydb->scheme->add('article',Array(
 		'name'=>'text',
 		'autor'=>'#user.id',

@@ -85,6 +85,7 @@ while($row=$mydb->scheme->res_row($res))
 					//'q1'
 			);
 	*/
+	$_QDEBUG=true;
 	$res = $mydb->scheme->select('article',Array(
 			'name',
 			'autor|name',

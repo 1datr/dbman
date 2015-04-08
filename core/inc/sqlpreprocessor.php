@@ -137,21 +137,10 @@ class sqlpreprocessor {
 			$select_params['joins'][$jkey]=$join;
 		}
 		
-		/*	
-					$newj = Array(
-							'jtype'=>$jtype,
-							'jtable_to'=>$thetable,
-							'jto'=>$_table->_FIELDS[$fld]['bind']['field_to'],
-							'jfrom'=>$fld,
-							'jtable_from'=>$table_last,
-					);
-		*/
-		//	echo "\n>>\n$_thetable";
-			
 		// 
 		function chain_field($str,$table,&$selects)
 		{
-			if($str[0]=='$') // аргумент напрямую
+			if($str[0]=='$') // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 			{
 				$str = substr($str,1);
 				$selects[]=$str;		

@@ -276,7 +276,12 @@ class QMan
 		else 
 		{
 			if($params!=NULL)
+			{
 				$q = $this->make_params($q, $params);
+				global $_QDEBUG;
+				if($_QDEBUG)
+					echo ">>$q>>";
+			}
 			$qres = $this->_DRV->exe_query($q);
 		}
 		switch($this->mode)
