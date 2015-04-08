@@ -71,7 +71,7 @@ class DBSTable {
 		
 		foreach($deffields as $fld => $val)
 		{
-			if(!xarray_key_exists($info, $fld))
+			if(!xarray_key_exists($fld, $info))
 				$info[$fld]=$val;
 		}
 		

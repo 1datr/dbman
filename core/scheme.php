@@ -182,7 +182,7 @@ class DBScheme extends QMan
 				$this->_SCHEME[$tbl]->normalize();
 		}
 	}
-	// проверка биндингов и их типов
+	// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 	function normalize_bindings()
 	{
 		$_BINDS=Array();
@@ -192,7 +192,7 @@ class DBScheme extends QMan
 			{
 			//	echo "::>>";
 			//	var_dump($fld['bind']);
-				if( xarray_key_exists($fld, 'bind')) // Есть связка
+				if( xarray_key_exists($fld, 'bind')) // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 				{
 					/*echo ">>>";
 					var_dump($fld);*/
@@ -215,10 +215,10 @@ class DBScheme extends QMan
 	{
 	//	var_dump($this->_SCHEME);
 		$this->normalize();
-	var_dump($this->_SCHEME);
+	//var_dump($this->_SCHEME);
 		$this->normalize_bindings();
-		echo "AFTER::";
-	var_dump($this->_SCHEME);
+	//	echo "AFTER::";
+	//var_dump($this->_SCHEME);
 		// пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ
 		$tables = $this->_DRV->TableList();
 		
