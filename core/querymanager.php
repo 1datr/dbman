@@ -445,6 +445,11 @@ class QMan
 				$this->_SELECT_ARGS['group'][]=$group_arg;
 	}
 	
+	// exe sql query
+	function exe_sql($query,$exept=true)
+	{
+		$q = $this->_DRV->exe_query($query,$exept);
+	}
 		// get row from result
 	function res_row($res)
 	{

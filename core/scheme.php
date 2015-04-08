@@ -23,8 +23,6 @@ class DBScheme extends QMan
 		
 	}
 	
-	
-	
 	function  __construct($dbscheme=NULL)
 	{
 		
@@ -184,16 +182,46 @@ class DBScheme extends QMan
 				$this->_SCHEME[$tbl]->normalize();
 		}
 	}
+	// проверка биндингов и их типов
+	function normalize_bindings()
+	{
+		$_BINDS=Array();
+		foreach($this->_SCHEME as $key => &$obj)
+		{
+			foreach ($obj->_FIELDS as $fldkey => &$fld )
+			{
+			//	echo "::>>";
+			//	var_dump($fld['bind']);
+				if( xarray_key_exists($fld, 'bind')) // Есть связка
+				{
+					/*echo ">>>";
+					var_dump($fld);*/
+					if($fld['bind']['field_to']=='id') // id
+					{
+						$fld['Type']='bigint';
+					}
+					else 
+					{
+						$fld['Type']=$this->_SCHEME[$fld['bind']['table_to']]->_FIELDS[$fld['bind']['field_to']]['Type'];
+					}
+				/*	echo "000>>>";
+					var_dump($fld);*/
+				}
+			}
+		}
+	}
 	// commit all changes in scheme
 	function dbcommit()
 	{
 	//	var_dump($this->_SCHEME);
 		$this->normalize();
-	//	var_dump($this->_SCHEME);
+	var_dump($this->_SCHEME);
+		$this->normalize_bindings();
+		echo "AFTER::";
+	var_dump($this->_SCHEME);
 		// пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ
 		$tables = $this->_DRV->TableList();
-		//echo "TABLES:";
-		//var_dump($tables);
+		
 		foreach($tables as $tbl)
 		{
 		//	echo "<br />>>>$tbl";

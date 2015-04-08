@@ -118,7 +118,7 @@ class DBSTable {
 			$info["sub_charset"]="utf8_general_ci";
 		
 		
-		var_dump($info);	
+		//var_dump($info);	
 	}
 	
 	
