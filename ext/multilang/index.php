@@ -74,7 +74,33 @@ class DBMExtMultilang extends DBMExtention{
 		{
 			$matches = Array();
 			// \ml:field
-			if(preg_match_all("|[\\/]{0,1}ml\:(.+)|",$val,$matches))
+			
+				
+			if(preg_match_all("|[\\/]{0,1}ml\:(.+)\[(.+)\]|",$val,$matches))
+			{
+					var_dump($matches);
+				
+					$fldname = $matches[1][0];
+					$tblname = $args['args']['table']."_$fldname";
+					// delete the field
+					$args['scheme']->join(Array(
+							'from'=>Array('table'=>$args['args']['table'], 'field'=>'id'),
+							'to'=>Array('table'=>$tblname, 'field'=>'recid')
+					)
+					);
+					$args['scheme']->join(Array(
+							'from'=>Array('table'=>$tblname, 'field'=>'lang'),
+							'to'=>Array('table'=>'language', 'field'=>'id')
+					)
+					);
+					$args['scheme']->op(Array('table'=>'language','field'=>'short'),$matches[2][0],'=');
+					unset($args['scheme']->_SELECT_ARGS['select'][$idx]);
+					$args['scheme']->_SELECT_ARGS['select'][]='$'.$args['scheme']->_DRV->_PREFIX."$tblname.text";
+					// delete the field
+					unset($args['args']['select'][$idx]);
+			}				
+			// \ml:field[ru]
+			elseif(preg_match_all("|[\\/]{0,1}ml\:(.+)|",$val,$matches))
 			{
 				$fldname = $matches[1][0];
 				$tblname = $args['args']['table']."_$fldname";
@@ -82,7 +108,7 @@ class DBMExtMultilang extends DBMExtention{
 				$args['scheme']->join(Array(
 						'from'=>Array('table'=>$args['args']['table'], 'field'=>'id'),
 						'to'=>Array('table'=>$tblname, 'field'=>'recid')
-						)
+				)
 				);
 				$args['scheme']->join(Array(
 						'from'=>Array('table'=>$tblname, 'field'=>'lang'),
@@ -92,18 +118,7 @@ class DBMExtMultilang extends DBMExtention{
 				$args['scheme']->op(Array('table'=>'language','field'=>'short'),$_CURR_LANGUAGE,'=');
 				unset($args['scheme']->_SELECT_ARGS['select'][$idx]);
 				$args['scheme']->_SELECT_ARGS['select'][]='$'.$args['scheme']->_DRV->_PREFIX."$tblname.text";
-			/*	echo ">>>";
-				var_dump($args['scheme']);*/
-				
 			}
-			// \ml:field[ru]
-			elseif(preg_match_all("|[\\/]{0,1}ml\:(.+)\[(.+)\]|",$val,$matches))
-			{
-				
-				// delete the field
-				unset($args['args']['select'][$idx]);
-			}
-			
 		}
 	}
 	

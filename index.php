@@ -89,7 +89,7 @@ while($row=$mydb->scheme->res_row($res))
 	$res = $mydb->scheme->select('article',Array(
 			'name',
 			'autor|name',
-			'/ml:atext',
+			'/ml:atext[ru]',
 			
 			//'user|id<groupmember:group',
 	))->exe(
