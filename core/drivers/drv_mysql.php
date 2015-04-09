@@ -510,6 +510,62 @@ ON DELETE ".$bind_data['on_delete']." ON UPDATE ".$bind_data['on_update']."";
 			//$str_from = $_PREFIX.$select_params['table'].$str_join;
 			return $str_join; 
 		}
+		
+		
+		// make where section
+		function makewhere($args,$_PREFIX)
+		{
+			$_WHERE=$args['where'];
+			$WHEREBUF=$args['WHEREBUF'];
+			if(count($WHEREBUF))
+			{
+				if($_WHERE==1)
+					$_WHERE="1 ";
+				foreach($WHEREBUF as $idx => $whereitem)
+				{
+					// op1
+					//
+					if( is_string($whereitem['op1']))
+						$whereitem['op1']="'".$whereitem['op1']."'";
+					//
+					if(xarray_key_exists('field', $whereitem['op1']))
+					{
+						if(xarray_key_exists('table', $whereitem['op1']))
+						{
+							$whereitem['op1']=$_PREFIX.$whereitem['op1']['table'].".".$whereitem['op1']['field'];
+						}
+						else 
+						{
+							$whereitem['op1']=$_PREFIX.$args['table'].".".$whereitem['op1']['field'];
+							
+						}
+					}				
+					// op2
+					// is string
+					if( is_string($whereitem['op2']))
+						$whereitem['op2']="'".$whereitem['op2']."'";
+					//
+					if(xarray_key_exists('field', $whereitem['op2']))
+					{
+						if(xarray_key_exists('table', $whereitem['op2']))
+						{
+							$whereitem['op2']=$_PREFIX.$whereitem['op2']['table'].".".$whereitem['op2']['field'];
+						}
+						else
+						{
+							$whereitem['op2']=$_PREFIX.$args['table'].".".$whereitem['op2']['field'];
+								
+						}
+					}
+					
+					
+					$_WHERE = $_WHERE." AND ".$whereitem['op1'].$whereitem['op'].$whereitem['op2'];
+					
+				}
+			}
+			
+			return $_WHERE;
+		}
 		// add field to selects list
 		
 		
@@ -536,9 +592,9 @@ ON DELETE ".$bind_data['on_delete']." ON UPDATE ".$bind_data['on_update']."";
 			$_limit = "$l1,".$select_params['limit']['size'];
 		}
 		
-		
 		$sql = "SELECT ".make_select_str($select_params['select'],$this->_PREFIX)." FROM ".$this->_PREFIX.$select_params['table']." ".
-				make_join_str($select_params['joins'],$select_params,$this->_PREFIX)." WHERE ".$select_params['where']." ".$_limit ;
+				make_join_str($select_params['joins'],$select_params,$this->_PREFIX)." WHERE ".
+				makewhere($select_params,$this->_PREFIX)." ".$_limit ;
 		$this->dbg(__LINE__,$sql);
 		return $sql;
 

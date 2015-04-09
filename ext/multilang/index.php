@@ -84,8 +84,17 @@ class DBMExtMultilang extends DBMExtention{
 						'to'=>Array('table'=>$tblname, 'field'=>'recid')
 						)
 				);
-				$args['scheme']->_SELECT_ARGS['select'][]='$'."$tblname.text";
-				unset($args['args']['select'][$idx]);
+				$args['scheme']->join(Array(
+						'from'=>Array('table'=>$tblname, 'field'=>'lang'),
+						'to'=>Array('table'=>'language', 'field'=>'id')
+				)
+				);
+				$args['scheme']->op(Array('table'=>'language','field'=>'short'),$_CURR_LANGUAGE,'=');
+				unset($args['scheme']->_SELECT_ARGS['select'][$idx]);
+				$args['scheme']->_SELECT_ARGS['select'][]='$'.$args['scheme']->_DRV->_PREFIX."$tblname.text";
+			/*	echo ">>>";
+				var_dump($args['scheme']);*/
+				
 			}
 			// \ml:field[ru]
 			elseif(preg_match_all("|[\\/]{0,1}ml\:(.+)\[(.+)\]|",$val,$matches))

@@ -7,6 +7,7 @@ class QMan
 	VAR $_UPDATE_ARGS=Array();
 	VAR $_DELETE_ARGS=Array();
 	VAR $_DELITEM_ARGS=Array();
+	VAR $_WHEREBUF=Array();
 	// get current arguments
 	function get_current_args()
 	{
@@ -60,7 +61,7 @@ class QMan
 	{
 		global $resx;
 	
-		$this->_BUF[] = Array('op'=>$op,'op1'=>$param,'op2'=>$val);
+		$this->_SELECT_ARGS['WHEREBUF'][] = Array('op'=>$op,'op1'=>$param,'op2'=>$val);
 		$resx=&$this;
 		return $resx;
 	}
@@ -69,7 +70,7 @@ class QMan
 	{
 		global $resx;
 		$resx=&$this;
-		$this->_BUF[] = Array('op'=>'AND');
+		$this->_SELECT_ARGS['WHEREBUF'][] = Array('op'=>'AND');
 		return $resx;
 	}
 	// ||
@@ -77,7 +78,7 @@ class QMan
 	{
 		global $resx;
 		$resx=&$this;
-		$this->_BUF[] = Array('op'=>'OR');
+		$this->_SELECT_ARGS['WHEREBUF'][] = Array('op'=>'OR');
 		return $resx;
 	}
 	// !
@@ -85,7 +86,7 @@ class QMan
 	{
 		global $resx;
 		$resx=&$this;
-		$this->_BUF[] = Array('op'=>'NOT');
+		$this->_SELECT_ARGS['WHEREBUF'][] = Array('op'=>'NOT');
 		return $resx;
 	}
 	

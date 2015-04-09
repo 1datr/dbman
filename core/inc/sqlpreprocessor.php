@@ -28,6 +28,14 @@ class sqlpreprocessor {
 			if(!$found)
 				$chbuf[]=$chnew;
 		}
+		// preprocess where parameters 
+		function preprocess_where(&$scheme)
+		{
+			if(count($this->_WHEREBUF)>0)
+			{
+				
+			}
+		}
 	
 		function preprocess_select($args)
 		{
@@ -45,7 +53,8 @@ class sqlpreprocessor {
 				$chain = $this->chain_field($selitem,$args['table'],$newargs);
 				
 			}
-			
+						
+		//	var_dump($newargs);
 			return $newargs;
 		}
 		// add field
@@ -143,7 +152,9 @@ class sqlpreprocessor {
 			if($str[0]=='$') // �������� ��������
 			{
 				$str = substr($str,1);
-				$selects[]=$str;		
+				$selects["select"][]=$str;	
+				echo "<<}}{{>>";
+				var_dump($selects);	
 				return ;
 			}
 			$_AS = NULL;	// field AS ...
