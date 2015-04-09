@@ -74,8 +74,6 @@ class DBMExtMultilang extends DBMExtention{
 		{
 			$matches = Array();
 			// \ml:field
-			
-				
 			if(preg_match_all("|[\\/]{0,1}ml\:(.+)\[(.+)\]|",$val,$matches))
 			{
 					var_dump($matches);

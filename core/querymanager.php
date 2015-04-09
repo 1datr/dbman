@@ -289,21 +289,28 @@ class QMan
 		{
 			case "select" :
 				
+				$this->exe_event('after_query',Array('qmode'=>'select'));
 				break;
 			case "update" :
 				
+				$this->exe_event('after_query',Array('qmode'=>'update'));
 				break;
 			case "add" :
 				
 				$qres = $this->_DRV->last_added_ids($this->_ADD_ARGS['table']);
 				mutex_free("add_".$this->_ADD_ARGS['table']);
+				
+				$this->exe_event('after_query',Array('qmode'=>'add'));
+					
 				//var_dump($q);
 				break;
 			case "delete" :
 			
+				$this->exe_event('after_query',Array('qmode'=>'delete'));
 				break;
 			case "deleteitem" :
 				
+				$this->exe_event('after_query',Array('qmode'=>'deleteitem'));
 				break;
 		}
 		return $qres;
