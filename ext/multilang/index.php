@@ -76,7 +76,7 @@ class DBMExtMultilang extends DBMExtention{
 			// \ml:field
 			if(preg_match_all("|[\\/]{0,1}ml\:(.+)\[(.+)\]|",$val,$matches))
 			{
-					var_dump($matches);
+				//	var_dump($matches);
 				
 					$fldname = $matches[1][0];
 					$tblname = $args['args']['table']."_$fldname";
@@ -118,6 +118,11 @@ class DBMExtMultilang extends DBMExtention{
 				$args['scheme']->_SELECT_ARGS['select'][]='$'.$args['scheme']->_DRV->_PREFIX."$tblname.text";
 			}
 		}
+	}
+	
+	function on_after_query(&$args)
+	{
+		
 	}
 	
 	function on_update(&$args)
