@@ -85,6 +85,8 @@ while($row=$mydb->scheme->res_row($res))
 					//'q1'
 			);
 	*/
+	
+	
 	$_QDEBUG=true;
 	$res = $mydb->scheme->select('article',Array(
 			'name',
@@ -99,13 +101,24 @@ while($row=$mydb->scheme->res_row($res))
 	{
 		var_dump($row);
 	}
-	
-	/*
-	$mydb->scheme->insert('user',Array(
+
+/*	$mydb->scheme->insert('user',Array(
 			Array('login'=>'user1','name'=>'user1'),
 			Array('login'=>'user2','name'=>'user2')
-			)
-	)->exe();
+	)
+	)->exe();*/
+	
+	
+	
+	$mydb->scheme->insert('article',Array(
+			'name'=>'Article 1',
+			'autor'=>$mydb->scheme->select('user',Array('id','name'))->where("login='root'")->exeq()->getfield(0,'id'),
+			'date'=>'@NOW()',
+			'/ml:atext'=>'Assw \n\r tyyoo'))->exe();
+	
+	
+	/*
+	
 	
 	$mydb->scheme->update('user',Array('password'=>'123456'))->where("password=''")->exe();
 	

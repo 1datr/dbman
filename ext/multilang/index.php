@@ -119,8 +119,82 @@ class DBMExtMultilang extends DBMExtention{
 			}
 		}
 	}
-	
+	// event after query
 	function on_after_query(&$args)
+	{
+		switch ($args['qmode'])
+		{
+			case 'select':
+				$this->aq_on_select($args);
+				break;
+			case 'update':
+				$this->aq_on_update($args);
+				break;
+			case 'add':
+				$this->aq_on_add($args);
+				break;
+			case 'delete':
+				$this->aq_on_delete($args);
+				break;
+			case 'delitem':
+				$this->aq_on_delitem($args);
+				break;
+		}
+	}
+	// after select query
+	function aq_on_select($args)
+	{
+	
+	}
+	// after update 
+	function aq_on_update($args)
+	{
+	
+	}
+	// after add query
+	function aq_on_add($args)
+	{
+		global $_CURR_LANGUAGE;
+		foreach($args['scheme']->_ADD_ARGS as $idx => $val)
+		{
+			$matches = Array();
+			// \ml:field
+			if(preg_match_all("|[\\/]{0,1}ml\:(.+)\[(.+)\]|",$val,$matches))
+			{
+				//	var_dump($matches);
+		
+				$fldname = $matches[1][0];
+				$lang_descriptor = $matches[2][0];
+				
+				
+				
+				unset($args['args']['select'][$idx]);
+			}
+			// \ml:field[ru]
+			elseif(preg_match_all("|[\\/]{0,1}ml\:(.+)|",$val,$matches))
+			{
+			/*	$fldname = $matches[1][0];
+				$tblname = $args['args']['table']."_$fldname";
+				// delete the field
+				$args['scheme']->join(Array(
+						'from'=>Array('table'=>$args['args']['table'], 'field'=>'id'),
+						'to'=>Array('table'=>$tblname, 'field'=>'recid')
+				)
+				);
+				$args['scheme']->join(Array(
+						'from'=>Array('table'=>$tblname, 'field'=>'lang'),
+						'to'=>Array('table'=>'language', 'field'=>'id')
+				)
+				);
+				$args['scheme']->op(Array('table'=>'language','field'=>'short'),$_CURR_LANGUAGE,'=');
+				unset($args['scheme']->_SELECT_ARGS['select'][$idx]);
+				$args['scheme']->_SELECT_ARGS['select'][]='$'.$args['scheme']->_DRV->_PREFIX."$tblname.text";
+			*/
+			}
+		}
+	}
+	// on delete item
+	function aq_on_delitem($args)
 	{
 		
 	}

@@ -11,6 +11,8 @@ function xarray_key_exists($key,$srch)
 // mark mutex occupied
 function mutex_mark($mtxname)
 {
+	global $_USEMUTEX;
+	if(!$_USEMUTEX) return ;
 	$_mtx_file =".mtx_$mtxname";
 	file_put_contents($_mtx_file,time());
 }
@@ -18,6 +20,8 @@ function mutex_mark($mtxname)
 // wait when the will be free
 function mutex_wait($mtxname)
 {
+	global $_USEMUTEX;
+	if(!$_USEMUTEX) return ;
 	$_mtx_file =".mtx_$mtxname";
 	while(file_exists($_mtx_file ))
 	{

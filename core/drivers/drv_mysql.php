@@ -242,15 +242,6 @@ class DBD_Mysql extends DBDriver
 				// Watch the difference between field image and the real field 
 				$fldinfo = $TableData->_FIELDS[$row[0]];
 				
-		/*		if($tblname=='user')
-				{
-					echo "fldinfo:";
-					var_dump($fldinfo);
-				}
-				
-				ALTER TABLE  `tdb_language` CHANGE  `full`  `full` TEXT CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL ;
-				*/
-				
 				if(!$fldinfo['virtual'])
 				{
 					//var_dump($TableData->_FIELDS[$row[0]]);
@@ -300,12 +291,7 @@ class DBD_Mysql extends DBDriver
 		
 		foreach($TableData->_FIELDS as $fldname => $fldimage)
 		{
-		/*	if($tblname=='user')
-			{
-				echo "fldinfo: $fldname -> ";
-				var_dump($fldimage);
-			}
-			*/
+		
 			if(!in_array($fldname, $fields))
 			{
 				$fldinfo = $this->CheckField($fldimage);
@@ -413,8 +399,7 @@ ON DELETE ".$bind_data['on_delete']." ON UPDATE ".$bind_data['on_update']."";
 		//echo "SHOW OPEN TABLES WHERE $where";
 		while($row = mysql_fetch_array($res))
 		{
-			//echo "ROW:";var_dump($row);
-			//echo ">>".$row['Table'];
+
 			$arr[]= substr($row[0],strlen($this->_PREFIX));
 		}
 		//var_dump($arr);
@@ -457,94 +442,97 @@ ON DELETE ".$bind_data['on_delete']." ON UPDATE ".$bind_data['on_update']."";
 		}
 		return $res;
 	}
+	
+	function result_row_by_number($res,$rowid,$fld=null)
+	{
+		if($fld==null)
+			return mysql_result($res,$rowid);
+		else
+			return mysql_result($res,$rowid,$fld);
+	}
 	// get row of result
 	function res_row($res)
 	{
 		return mysql_fetch_array($res,MYSQL_ASSOC);
 	}
 	// get associative array of normalized fields
-	
-	// query select
-	function q_select($select_params)
+	function make_select_str($selects,$_PREFIX='')
 	{
-		// select [t1.f1, t2,f2 ...]
-		function make_select_str($selects,$_PREFIX='')
+		$str_select="";
+		$i=0;
+		foreach ($selects as $selkey => $selitem)
 		{
-			$str_select="";
-			$i=0;
-			foreach ($selects as $selkey => $selitem)
+			if(is_string($selitem))
+				$str_select = $str_select.", $selitem";
+			else
 			{
-				if(is_string($selitem))
-					$str_select = $str_select.", $selitem";
-				else 
-				{
-
-					if($i)
-						$str_select = $str_select.", $_PREFIX{$selitem['table']}.{$selitem['fld']} as $selkey";
-					else
-						$str_select = $str_select."$_PREFIX{$selitem['table']}.{$selitem['fld']} as $selkey";
-				}
-				$i++;
+	
+				if($i)
+					$str_select = $str_select.", $_PREFIX{$selitem['table']}.{$selitem['fld']} as $selkey";
+				else
+					$str_select = $str_select."$_PREFIX{$selitem['table']}.{$selitem['fld']} as $selkey";
 			}
-			return $str_select;
+			$i++;
 		}
-		// join  t2 on t1.f1=t2.f2
-		function make_join_str($joins,&$select_params,$_PREFIX='')
+		return $str_select;
+	}
+	// join  t2 on t1.f1=t2.f2
+	function make_join_str($joins,&$select_params,$_PREFIX='')
+	{
+		$str_join = "";
+		$tbl_last = $select_params['table'];
+		foreach ($joins as $jkey => $jval )
 		{
-			$str_join = "";
-			$tbl_last = $select_params['table'];
-			foreach ($joins as $jkey => $jval )
-			{
-			
-				if($jval['to']['table']==$jkey)
-					$str_join = $str_join." {$jval['jtype']} join 
-	$_PREFIX$jkey on 
-	$_PREFIX{$jval['from']['table']}.{$jval['from']['field']}=".$_PREFIX.$jkey.'.'.$jval['to']['field']." ";
-				else 
-					$str_join = $str_join." {$jval['jtype']} join 
-	$_PREFIX{$jval['to']['table']} as $_PREFIX$jkey on 
-	$_PREFIX{$jval['from']['table']}.{$jval['from']['field']}=$_PREFIX.$jkey.{$jval['to']['field']} ";
-				//$tbl_last = $jval['jtable'];
-			}
 				
-			//$str_from = $_PREFIX.$select_params['table'].$str_join;
-			return $str_join; 
+			if($jval['to']['table']==$jkey)
+				$str_join = $str_join." {$jval['jtype']} join
+				$_PREFIX$jkey on
+				$_PREFIX{$jval['from']['table']}.{$jval['from']['field']}=".$_PREFIX.$jkey.'.'.$jval['to']['field']." ";
+			else
+				$str_join = $str_join." {$jval['jtype']} join
+				$_PREFIX{$jval['to']['table']} as $_PREFIX$jkey on
+				$_PREFIX{$jval['from']['table']}.{$jval['from']['field']}=$_PREFIX.$jkey.{$jval['to']['field']} ";
+			//$tbl_last = $jval['jtable'];
 		}
-		
-		
-		// make where section
-		function makewhere($args,$_PREFIX)
+	
+		//$str_from = $_PREFIX.$select_params['table'].$str_join;
+		return $str_join;
+	}
+	
+	
+	// make where section
+	function makewhere($args,$_PREFIX)
+	{
+	$_WHERE=$args['where'];
+		$WHEREBUF=$args['WHEREBUF'];
+		if(count($WHEREBUF))
 		{
-			$_WHERE=$args['where'];
-			$WHEREBUF=$args['WHEREBUF'];
-			if(count($WHEREBUF))
+		if($_WHERE==1)
+			$_WHERE="1 ";
+			foreach($WHEREBUF as $idx => $whereitem)
 			{
-				if($_WHERE==1)
-					$_WHERE="1 ";
-				foreach($WHEREBUF as $idx => $whereitem)
+			// op1
+			//
+			if( is_string($whereitem['op1']))
+				$whereitem['op1']="'".$whereitem['op1']."'";
+				//
+				if(xarray_key_exists('field', $whereitem['op1']))
 				{
-					// op1
-					//
-					if( is_string($whereitem['op1']))
-						$whereitem['op1']="'".$whereitem['op1']."'";
-					//
-					if(xarray_key_exists('field', $whereitem['op1']))
-					{
-						if(xarray_key_exists('table', $whereitem['op1']))
-						{
-							$whereitem['op1']=$_PREFIX.$whereitem['op1']['table'].".".$whereitem['op1']['field'];
-						}
-						else 
-						{
-							$whereitem['op1']=$_PREFIX.$args['table'].".".$whereitem['op1']['field'];
-							
-						}
-					}				
-					// op2
+			if(xarray_key_exists('table', $whereitem['op1']))
+			{
+			$whereitem['op1']=$_PREFIX.$whereitem['op1']['table'].".".$whereitem['op1']['field'];
+			}
+					else
+			{
+					$whereitem['op1']=$_PREFIX.$args['table'].".".$whereitem['op1']['field'];
+						
+			}
+			}
+			// op2
 					// is string
-					if( is_string($whereitem['op2']))
-						$whereitem['op2']="'".$whereitem['op2']."'";
-					//
+				if( is_string($whereitem['op2']))
+					$whereitem['op2']="'".$whereitem['op2']."'";
+							//
 					if(xarray_key_exists('field', $whereitem['op2']))
 					{
 						if(xarray_key_exists('table', $whereitem['op2']))
@@ -554,18 +542,22 @@ ON DELETE ".$bind_data['on_delete']." ON UPDATE ".$bind_data['on_update']."";
 						else
 						{
 							$whereitem['op2']=$_PREFIX.$args['table'].".".$whereitem['op2']['field'];
-								
 						}
 					}
-					
-					
-					$_WHERE = $_WHERE." AND ".$whereitem['op1'].$whereitem['op'].$whereitem['op2'];
-					
-				}
-			}
+												
 			
-			return $_WHERE;
+				$_WHERE = $_WHERE." AND ".$whereitem['op1'].$whereitem['op'].$whereitem['op2'];
+												
+			}
 		}
+		
+	return $_WHERE;
+	}
+	// query select
+	function q_select($select_params)
+	{
+		// select [t1.f1, t2,f2 ...]
+
 		// add field to selects list
 		
 		
@@ -592,9 +584,9 @@ ON DELETE ".$bind_data['on_delete']." ON UPDATE ".$bind_data['on_update']."";
 			$_limit = "$l1,".$select_params['limit']['size'];
 		}
 		
-		$sql = "SELECT ".make_select_str($select_params['select'],$this->_PREFIX)." FROM ".$this->_PREFIX.$select_params['table']." ".
-				make_join_str($select_params['joins'],$select_params,$this->_PREFIX)." WHERE ".
-				makewhere($select_params,$this->_PREFIX)." ".$_limit ;
+		$sql = "SELECT ".$this->make_select_str($select_params['select'],$this->_PREFIX)." FROM ".$this->_PREFIX.$select_params['table']." ".
+				$this->make_join_str($select_params['joins'],$select_params,$this->_PREFIX)." WHERE ".
+				$this->makewhere($select_params,$this->_PREFIX)." ".$_limit ;
 		$this->dbg(__LINE__,$sql);
 		return $sql;
 
@@ -627,6 +619,7 @@ ON DELETE ".$bind_data['on_delete']." ON UPDATE ".$bind_data['on_update']."";
 		$j = 0;
 		foreach($add_data['data'] as $k => $v)
 		{
+			
 			if($j==0)
 				$ins = " (NULL";
 			else 
@@ -636,6 +629,9 @@ ON DELETE ".$bind_data['on_delete']." ON UPDATE ".$bind_data['on_update']."";
 				$fldstr = "`id`";
 			foreach($v as $fld => $val)
 			{
+				if(($fld[0]=='/')||($fld[0]=='\\')) // virtual field
+					continue;
+				
 				if($j==0)
 				{
 					$fldstr = "$fldstr, `$fld`";
@@ -664,6 +660,9 @@ ON DELETE ".$bind_data['on_delete']." ON UPDATE ".$bind_data['on_update']."";
 		$i = 0;
 		foreach($upd_data['data'] as $col => $val)
 		{
+			if(($col[0]=='/')||($col[0]=='\\')) // virtual field
+				continue;
+			
 			if($val[0]=='@')	// mysql function calling
 			{
 				$val = sustr($val,1);
@@ -689,8 +688,7 @@ ON DELETE ".$bind_data['on_delete']." ON UPDATE ".$bind_data['on_update']."";
 		//var_dump($this->_BINDINGS);
 		foreach($this->_BINDINGS as $b)
 		{
-		/*	echo ">>";
-			var_dump($b);*/
+	
 			$this->create_binding($b['tblname'], $b['field'], $b['bind_data']);
 		}
 	}

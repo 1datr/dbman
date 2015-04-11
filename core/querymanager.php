@@ -8,6 +8,8 @@ class QMan
 	VAR $_DELETE_ARGS=Array();
 	VAR $_DELITEM_ARGS=Array();
 	VAR $_WHEREBUF=Array();
+	VAR $_RES=Null;
+	VAR $_ROW=Null;
 	// get current arguments
 	function get_current_args()
 	{
@@ -90,6 +92,7 @@ class QMan
 		return $resx;
 	}
 	
+	VAR $prepr=null;
 	// preprocess select query
 	function preprocess_select($args)
 	{
@@ -99,10 +102,10 @@ class QMan
 		//	echo "$DIR_INC/$preprc.php";
 		require_once "$DIR_INC/$preprc.php";
 	
-		$prepr = new $preprc();
+		$this->prepr = new $preprc();
 	
-		$prepr->setscheme($this->_SCHEME);
-		$newargs = $prepr->preprocess_select($args);
+		$this->prepr->setscheme($this->_SCHEME);
+		$newargs = $this->prepr->preprocess_select($args);
 		//	var_dump($newargs);
 		return $newargs;
 	}
@@ -114,9 +117,10 @@ class QMan
 		if(!empty($args['prepr'])) $preprc = $args['prepr'];
 			require_once "$DIR_INC/$preprc.php";
 	
-			$prepr = new $preprc();;
-			$prepr->scheme = $this->_SCHEME;
-			return  $prepr->preprocess_update($args);
+		$this->prepr = new $preprc();
+			
+		$prepr->scheme = $this->_SCHEME;
+		return  $this->prepr->preprocess_update($args);
 	
 	}
 	
@@ -127,9 +131,9 @@ class QMan
 		if(!empty($args['prepr'])) $preprc = $args['prepr'];
 		require_once "$DIR_INC/$preprc.php";
 		
-		$prepr = new $preprc();
-		$prepr->scheme = $this->_SCHEME;
-		return  $prepr->preprocess_add($args);
+		$this->prepr = new $preprc();
+		$this->prepr->scheme = $this->_SCHEME;
+		return  $this->prepr->preprocess_add($args);
 	}
 	
 	VAR $mode;
@@ -141,9 +145,9 @@ class QMan
 		if(!empty($args['prepr'])) $preprc = $args['prepr'];
 		require_once "$DIR_INC/$preprc.php";
 		
-		$prepr = new $preprc();
-		$prepr->scheme = $this->_SCHEME;
-		return  $prepr->preprocess_delete($args);
+		$this->prepr = new $preprc();
+		$this->prepr->scheme = $this->_SCHEME;
+		return  $this->prepr->preprocess_delete($args);
 	}
 	
 	// saved query exists
@@ -185,6 +189,26 @@ class QMan
 			$this->_EXTBUF[]=new $extclassname();
 			}
 		}
+	}
+	
+	function datarow($rnumber)
+	{
+		
+		$this->_ROW = $this->_DRV->result_row($this->_RES,$rnumber);
+		return $this;
+	}
+	
+	function rowfield($fld)
+	{
+		if(!empty($this->_ROW))
+			return null;
+		return $this->_ROW[$fld];
+	}
+	
+	function exeq($qid=NULL,$params=NULL)
+	{
+		$this->_RES = $this->exe($qid,$params);
+		return $this;
 	}
 	
 	function exe($qid=NULL,$params=NULL)
@@ -289,28 +313,28 @@ class QMan
 		{
 			case "select" :
 				
-				$this->exe_event('after_query',Array('qmode'=>'select'));
+				$this->exe_event('after_query',Array('qmode'=>'select','qresult'=>$qres));
 				break;
 			case "update" :
 				
-				$this->exe_event('after_query',Array('qmode'=>'update'));
+				$this->exe_event('after_query',Array('qmode'=>'update','qresult'=>$qres));
 				break;
 			case "add" :
 				
 				$qres = $this->_DRV->last_added_ids($this->_ADD_ARGS['table']);
 				mutex_free("add_".$this->_ADD_ARGS['table']);
 				
-				$this->exe_event('after_query',Array('qmode'=>'add'));
+				$this->exe_event('after_query',Array('qmode'=>'add','qresult'=>$qres));
 					
 				//var_dump($q);
 				break;
 			case "delete" :
 			
-				$this->exe_event('after_query',Array('qmode'=>'delete'));
+				$this->exe_event('after_query',Array('qmode'=>'delete','qresult'=>$qres));
 				break;
 			case "deleteitem" :
 				
-				$this->exe_event('after_query',Array('qmode'=>'deleteitem'));
+				$this->exe_event('after_query',Array('qmode'=>'deleteitem','qresult'=>$qres));
 				break;
 		}
 		return $qres;
@@ -464,9 +488,14 @@ class QMan
 		$q = $this->_DRV->exe_query($query,$exept);
 	}
 		// get row from result
-	function res_row($res)
+	function getfield($rid,$fld)
 	{
-		return $this->_DRV->res_row($res);
+		return $this->_DRV->result_row_by_number($this->_RES,$rid,$fld);
+	}	
+	// result row
+	function res_row($rid)
+	{
+		return $this->_DRV->res_row($rid);
 	}
 }
 ?>

@@ -33,6 +33,8 @@ abstract class DBDriver {
 	abstract function Select($selectdata);
 	// create database
 	abstract function CreateDB($dbname);
+	// get row (id) or of result or field of this row
+	abstract function result_row_by_number($res,$rowid,$fld=null);
 	
 	abstract function GetTableRows($tbl);
 	// Commit data table

@@ -194,8 +194,7 @@ class DBScheme extends QMan
 			//	var_dump($fld['bind']);
 				if( xarray_key_exists($fld, 'bind')) // ���� ������
 				{
-					/*echo ">>>";
-					var_dump($fld);*/
+					
 					if($fld['bind']['field_to']=='id') // id
 					{
 						$fld['Type']='bigint';
@@ -204,8 +203,7 @@ class DBScheme extends QMan
 					{
 						$fld['Type']=$this->_SCHEME[$fld['bind']['table_to']]->_FIELDS[$fld['bind']['field_to']]['Type'];
 					}
-				/*	echo "000>>>";
-					var_dump($fld);*/
+				
 				}
 			}
 		}

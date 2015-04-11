@@ -153,8 +153,7 @@ class sqlpreprocessor {
 			{
 				$str = substr($str,1);
 				$selects["select"][]=$str;	
-				echo "<<}}{{>>";
-				var_dump($selects);	
+			
 				return ;
 			}
 			$_AS = NULL;	// field AS ...
@@ -204,8 +203,7 @@ class sqlpreprocessor {
 							'nullable'=>$nullable,
 							);
 					$chain[] = $z;
-				/*	echo ">>";
-					var_dump($this->_scheme[$_table]->_FIELDS[$element]);*/
+			
 					$_thetable = $_table;
 					if(!empty($this->_scheme[$_table]->_FIELDS[$element]['bind']))
 					{
