@@ -66,7 +66,7 @@ while($row=$mydb->scheme->res_row($res))
 	var_dump($row);
 }
 */
-
+/*
 	$ids = $mydb->scheme->insert('user',Array(
 			Array('login'=>'petya','name'=>'petya','password'=>'123456'),
 			Array('login'=>'valya','name'=>'Valya','password'=>'valya'),
@@ -74,6 +74,7 @@ while($row=$mydb->scheme->res_row($res))
 	)
 	)->exe();
 	var_dump($ids);
+	*/
 	
 	/*
 	 $res = $mydb->scheme->select('project',Array(
@@ -86,7 +87,7 @@ while($row=$mydb->scheme->res_row($res))
 			);
 	*/
 	
-	
+	/*
 	$_QDEBUG=true;
 	$res = $mydb->scheme->select('article',Array(
 			'name',
@@ -101,15 +102,14 @@ while($row=$mydb->scheme->res_row($res))
 	{
 		var_dump($row);
 	}
-
+*/
 /*	$mydb->scheme->insert('user',Array(
 			Array('login'=>'user1','name'=>'user1'),
 			Array('login'=>'user2','name'=>'user2')
 	)
 	)->exe();*/
 	
-	
-	
+	/*
 	$mydb->scheme->insert('article',Array(
 			'name'=>'Article 1',
 			'autor'=>$mydb->scheme->select('user',Array('id','name'))->where("login='root'")->exeq()->getfield(0,'id'),
@@ -118,12 +118,15 @@ while($row=$mydb->scheme->res_row($res))
 			'/ml:atext[ru]'=>'Жэээ кеее',
 			))->exe();
 	
+	*/
+	$res = $mydb->scheme->update('article',Array('/ml:atext[en]'=>'Sdd err iop'))->where("autor=1")->exe();
+
 	
 	/*
-	
-	
-	$mydb->scheme->update('user',Array('password'=>'123456'))->where("password=''")->exe();
-	
+	$res = $mydb->scheme->update('user',Array('password'=>'123456'))->where("password=''")->exe();
+
+	*/
+	/*
 	$mydb->scheme->insert('user',Array(
 			Array('login'=>'user3','name'=>'user3'),
 	)
