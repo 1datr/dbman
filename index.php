@@ -114,7 +114,9 @@ while($row=$mydb->scheme->res_row($res))
 			'name'=>'Article 1',
 			'autor'=>$mydb->scheme->select('user',Array('id','name'))->where("login='root'")->exeq()->getfield(0,'id'),
 			'date'=>'@NOW()',
-			'/ml:atext'=>'Assw \n\r tyyoo'))->exe();
+			'/ml:atext[en]'=>'Assw \n\r tyyoo',
+			'/ml:atext[ru]'=>'Жэээ кеее',
+			))->exe();
 	
 	
 	/*

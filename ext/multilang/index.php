@@ -155,41 +155,46 @@ class DBMExtMultilang extends DBMExtention{
 	function aq_on_add($args)
 	{
 		global $_CURR_LANGUAGE;
-		foreach($args['scheme']->_ADD_ARGS as $idx => $val)
+		foreach($args['scheme']->_ADD_ARGS['data'] as $idx => $arr)
 		{
-			$matches = Array();
-			// \ml:field
-			if(preg_match_all("|[\\/]{0,1}ml\:(.+)\[(.+)\]|",$val,$matches))
+			foreach ($arr as $key => $val)
 			{
-				//	var_dump($matches);
-		
-				$fldname = $matches[1][0];
-				$lang_descriptor = $matches[2][0];
-				
-				
-				
-				unset($args['args']['select'][$idx]);
-			}
-			// \ml:field[ru]
-			elseif(preg_match_all("|[\\/]{0,1}ml\:(.+)|",$val,$matches))
-			{
-			/*	$fldname = $matches[1][0];
-				$tblname = $args['args']['table']."_$fldname";
-				// delete the field
-				$args['scheme']->join(Array(
-						'from'=>Array('table'=>$args['args']['table'], 'field'=>'id'),
-						'to'=>Array('table'=>$tblname, 'field'=>'recid')
-				)
-				);
-				$args['scheme']->join(Array(
-						'from'=>Array('table'=>$tblname, 'field'=>'lang'),
-						'to'=>Array('table'=>'language', 'field'=>'id')
-				)
-				);
-				$args['scheme']->op(Array('table'=>'language','field'=>'short'),$_CURR_LANGUAGE,'=');
-				unset($args['scheme']->_SELECT_ARGS['select'][$idx]);
-				$args['scheme']->_SELECT_ARGS['select'][]='$'.$args['scheme']->_DRV->_PREFIX."$tblname.text";
-			*/
+				$matches = Array();
+				// \ml:field
+				if(preg_match_all("|[\\/]{0,1}ml\:(.+)\[(.+)\]|",$key,$matches))
+				{
+					//	var_dump($matches);
+			
+					$fldname = $matches[1][0];
+					$lang_descriptor = $matches[2][0];
+					$tblname = $args['scheme']->_ADD_ARGS['table']."_$fldname";
+					
+					$_args = $args['scheme']->get_current_args(); // get the current args
+					$args['scheme']->insert($tblname,Array(
+								'recid'=>$args['qresult'][$idx],
+								'lang'=>$args['scheme']->select('language',Array('id'))->where("short='$lang_descriptor'")->exeq()->getfield(0,'id'),
+								'text'=>$val,
+								)
+							)->exe();
+					//
+					$args['scheme']->set_args($_args); // set the saved args
+					
+					//unset($args['args']['select'][$idx]);
+				}
+				// \ml:field[ru]
+				elseif(preg_match_all("|[\\/]{0,1}ml\:(.+)|",$key,$matches))
+				{
+					$fldname = $matches[1][0];
+					$lang_descriptor = $matches[2][0];
+					$tblname = $args['scheme']->_ADD_ARGS['table']."_$fldname";
+						
+					$args['scheme']->insert($tblname,Array(
+							'recid'=>$args['qresult'][$idx],
+							'lang'=>$args['scheme']->select('language',Array('id'))->where("short='$_CURR_LANGUAGE'")->exeq()->getfield(0,'id'),
+							'text'=>$val,
+					)
+					)->exe();
+				}
 			}
 		}
 	}

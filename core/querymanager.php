@@ -15,23 +15,10 @@ class QMan
 	{
 		$_ARGS = Array();
 		$_ARGS['mode']=$this->mode;
-		switch($this->mode)
+		$points_to_copy = Array('_SELECT_ARGS','_ADD_ARGS','_UPDATE_ARGS','_DELETE_ARGS','_DELITEM_ARGS');
+		foreach ($points_to_copy as $p)
 		{
-			case 'select':
-					$_ARGS['args']=$this->_SELECT_ARGS;
-				break;
-			case 'update':
-					$_ARGS['args']=$this->_ADD_ARGS;
-				break;
-			case 'add':
-					$_ARGS['args']=$this->_UPDATE_ARGS;
-				break;
-			case 'delete':
-					$_ARGS['args']=$this->_DELETE_ARGS;
-				break;
-			case 'deleteitem':
-					$_ARGS['args']=$this->_DELITEM_ARGS;
-				break;
+			$_ARGS[$p]=$this->$p;
 		}
 		return $_ARGS;
 	}
@@ -39,23 +26,10 @@ class QMan
 	function set_args($_args)
 	{
 		$this->mode = $_args['mode'];
-		switch($_args['mode'])
+		$points_to_copy = Array('_SELECT_ARGS','_ADD_ARGS','_UPDATE_ARGS','_DELETE_ARGS','_DELITEM_ARGS');
+		foreach ($points_to_copy as $p)
 		{
-			case 'select':
-					$this->_SELECT_ARGS = $_ARGS['args'];
-				break;
-			case 'update':
-					$this->_ADD_ARGS = $_ARGS['args'];
-				break;
-			case 'add':
-					$this->_UPDATE_ARGS = $_ARGS['args'];
-				break;
-			case 'delete':
-					$this->_DELETE_ARGS = $_ARGS['args'];
-				break;
-			case 'deleteitem':
-					$this->_DELITEM_ARGS = $_ARGS['args'];
-				break;
+			$this->$p = $_args[$p];
 		}
 	}
 	// =
@@ -369,7 +343,7 @@ class QMan
 		$this->_ADD_ARGS['table']=$table;
 		if(empty($this->_ADD_ARGS['data']))
 			$this->_ADD_ARGS['data']=Array();
-		
+		// normalize data
 		if(is_array($data[0]))
 		{
 			foreach ($data as $d)
