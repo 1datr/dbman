@@ -458,6 +458,8 @@ ON DELETE ".$bind_data['on_delete']." ON UPDATE ".$bind_data['on_update']."";
 	// get associative array of normalized fields
 	function make_select_str($selects,$_PREFIX='')
 	{
+		//echo "::>>";
+		var_dump($selects);
 		
 		if(count($selects)==0) return '*';
 		if($selects=='*') return '*';
@@ -466,24 +468,30 @@ ON DELETE ".$bind_data['on_delete']." ON UPDATE ".$bind_data['on_update']."";
 		$_selects = Array();
 		foreach ($selects as $selkey => $selitem)
 		{
-			
-			if(is_string($selitem))
+			/*if(!is_string($selkey))
 			{
 				$str_select = $str_select.", $selitem";
 			}
 			else
-			{
-				if($selitem['fld']=='*')
+			{*/
+				if(is_string($selitem))
 				{
-					$_selects[] =  "$_PREFIX{$selitem['table']}.{$selitem['fld']}";
+					$_selects[] = $selitem;
 				}
 				else
 				{
-					$_selects[] = "$_PREFIX{$selitem['table']}.{$selitem['fld']} as $selkey";
-				
-				}
+					if($selitem['fld']=='*')
+					{
+						$_selects[] =  "$_PREFIX{$selitem['table']}.{$selitem['fld']}";
+					}
+					else
+					{
+						$_selects[] = "$_PREFIX{$selitem['table']}.{$selitem['fld']} as $selkey";
 					
-			}
+					}
+						
+				}
+			//}
 			$i++;
 		}
 		$_str = implode(',',$_selects);
