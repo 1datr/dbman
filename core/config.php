@@ -13,6 +13,6 @@ $_DEF_SUBCHARSET = "utf8_general_ci";
 $_MAX_COUNT_IN_ADDBLOCK = 3;
 $_QDEBUG = false;
 $_AUTO_CREATE_DB = true;
-$_QFILEDUMP = false;
+$_QFILEDUMP = true;
 $_USEMUTEX = false;
 ?>

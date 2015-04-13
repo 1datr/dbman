@@ -603,13 +603,30 @@ ON DELETE ".$bind_data['on_delete']." ON UPDATE ".$bind_data['on_update']."";
 		
 		$sql = "SELECT ".$this->make_select_str($select_params['select'],$this->_PREFIX)." FROM ".$this->_PREFIX.$select_params['table']." ".
 				$this->make_join_str($select_params['joins'],$select_params,$this->_PREFIX)." WHERE ".
-				$this->makewhere($select_params['where'],$this->_PREFIX)." ".$_limit ;
+				$this->makewhere($select_params['where'],$this->_PREFIX)." ".
+				$this->make_order($select_params['order'])." ".
+				$_limit ;
 		$this->dbg(__LINE__,$sql);
 		return $sql;
 
 	}
 	
-
+	function make_order($orders)
+	{
+		if(count($orders)==0) return "";
+		return "ORDER BY ".ximplode(',',$orders,"{fld} {dir}",Array('@@'=>$this->_PREFIX));
+	}
+	
+	function make_group($groups)
+	{
+		
+	}
+	
+	function make_having($groups)
+	{
+	
+	}
+	
 	// query delete
 	function q_delete($del_params)
 	{

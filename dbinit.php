@@ -45,13 +45,14 @@ $mydb->scheme->add('category',Array(
 				),
 		)
 ));
+*/
 $mydb->scheme->add('project',Array(
 		'name'=>'text',
 		'user'=>'#user.id',
 		//'fld1'=>'varchar',
 		'date'=>'datetime',
 ));
-
+/*
 $mydb->scheme->add('mail',Array(
 		'topic'=>'text',
 		'userfrom'=>'#user.id',

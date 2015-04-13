@@ -82,7 +82,7 @@ while($row=$mydb->scheme->res_row($res))
 			'user|login as userlogin',			
 			'user|name as username',
 			//'user|id<groupmember:group',
-			))->exe(
+			))->order('userlogin')->exe(
 					//'q1'
 			);
 	*/

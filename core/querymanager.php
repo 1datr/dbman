@@ -342,7 +342,20 @@ class QMan
 		$this->_SELECT_ARGS['select']=$selparams;
 		$this->_SELECT_ARGS['joins']=Array();
 		$this->_SELECT_ARGS['groupby']=Array();
+		$this->_SELECT_ARGS['having']=Array();
+		$this->_SELECT_ARGS['order']=Array();
 		//$this->_SELECT_ARGS['scheme']=&$this->_SCHEME;
+		return $this;
+	}
+	
+	function order($fld)
+	{
+		$this->_SELECT_ARGS['order'][]=Array('fld'=>$fld,'dir'=>'ASC');
+		return $this;
+	}
+	function order_d($fld)
+	{
+		$this->_SELECT_ARGS['order'][]=Array('fld'=>$fld,'dir'=>'DESC');
 		return $this;
 	}
 	// insert some data

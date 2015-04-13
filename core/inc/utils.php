@@ -8,6 +8,29 @@ function xarray_key_exists($key,$srch)
 	
 }
 
+function ximplode($delimeter,$hasharray,$template,$_array=Null)
+{
+	$newhash=Array();
+	foreach ($hasharray as $idx => $val)
+	{
+		$tpl=Array();
+		$tpl["{idx}"]=$idx;
+		foreach($val as $key => $v)
+		{
+			$tpl["{".$key."}"]=$v;
+		}
+		$val = strtr($template,$tpl);
+		
+		if($_array!=null)
+		{
+			$val = strtr($val,$_array);
+		}
+		$newhash[]=$val;
+	}
+	
+	return implode($delimeter,$newhash);
+}
+
 // mark mutex occupied
 function mutex_mark($mtxname)
 {
