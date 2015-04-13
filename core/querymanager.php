@@ -1,4 +1,5 @@
 <?php 
+
 class QMan
 {
 	
@@ -22,6 +23,10 @@ class QMan
 		}
 		return $_ARGS;
 	}
+	function result_count($res)
+	{ 
+		return $this->_DRV->res_count($res);
+	}
 	// set arguments
 	function set_args($_args)
 	{
@@ -37,7 +42,7 @@ class QMan
 	{
 		global $resx;
 	
-		$this->_SELECT_ARGS['WHEREBUF'][] = Array('op'=>$op,'op1'=>$param,'op2'=>$val);
+		$this->where_buf_ptr[] = Array('op'=>$op,'op1'=>$param,'op2'=>$val);
 		$resx=&$this;
 		return $resx;
 	}
@@ -46,7 +51,7 @@ class QMan
 	{
 		global $resx;
 		$resx=&$this;
-		$this->_SELECT_ARGS['WHEREBUF'][] = Array('op'=>'AND');
+		$this->where($param,'AND');
 		return $resx;
 	}
 	// ||
@@ -54,7 +59,7 @@ class QMan
 	{
 		global $resx;
 		$resx=&$this;
-		$this->_SELECT_ARGS['WHEREBUF'][] = Array('op'=>'OR');
+		$this->where($param,'OR');
 		return $resx;
 	}
 	// !
@@ -274,14 +279,17 @@ class QMan
 		}
 		else 
 		{
-			if($params!=NULL)
+			if($q!=FALSE) // если запрос адекватен
 			{
-				$q = $this->make_params($q, $params);
-				global $_QDEBUG;
-				if($_QDEBUG)
-					echo ">>$q>>";
+				if($params!=NULL)
+				{
+					$q = $this->make_params($q, $params);
+					global $_QDEBUG;
+					if($_QDEBUG)
+						echo ">>$q>>";
+				}
+				$qres = $this->_DRV->exe_query($q);
 			}
-			$qres = $this->_DRV->exe_query($q);
 		}
 		switch($this->mode)
 		{
@@ -332,6 +340,8 @@ class QMan
 		$this->_SELECT_ARGS = Array();
 		$this->_SELECT_ARGS['table']=$table;
 		$this->_SELECT_ARGS['select']=$selparams;
+		$this->_SELECT_ARGS['joins']=Array();
+		$this->_SELECT_ARGS['groupby']=Array();
 		//$this->_SELECT_ARGS['scheme']=&$this->_SCHEME;
 		return $this;
 	}
@@ -413,19 +423,30 @@ class QMan
 		}
 		return $this;
 	}
-	
-	function where($_WHERE)
+		
+	function where($_WHERE=Null,$binding='AND')
 	{
+		if($_WHERE ==Null)
+			$_WHERE="1";
 		switch($this->mode)
 		{
 			case 'select':
-				$this->_SELECT_ARGS['where']=$_WHERE;
+				if(empty($this->_SELECT_ARGS['where']))
+					$this->_SELECT_ARGS['where']=$_WHERE;
+				else 
+					$this->_SELECT_ARGS['where']=$this->_SELECT_ARGS['where']." $binding $_WHERE";
 				break;
 			case 'update':
-				$this->_UPDATE_ARGS['where']=$_WHERE;
+				if(empty($this->_UPDATE_ARGS['where']))
+					$this->_UPDATE_ARGS['where']=$_WHERE;
+				else
+					$this->_UPDATE_ARGS['where']=$this->_UPDATE_ARGS['where']." $binding $_WHERE";
 				break;
 			case 'delete':
-				$this->_DELETE_ARGS['where']=$_WHERE;
+				if(empty($this->_DELETE_ARGS['where']))
+					$this->_DELETE_ARGS['where']=$_WHERE;
+				else
+					$this->_DELETE_ARGS['where']=$this->_DELETE_ARGS['where']." $binding $_WHERE";
 				break;
 		}
 		return $this;

@@ -47,12 +47,13 @@ class sqlpreprocessor {
 			
 			$newargs['select'] = Array();
 			$chains = Array();
-			foreach($args['select'] as $selitem)
-			{
-				
-				$chain = $this->chain_field($selitem,$args['table'],$newargs);
-				
-			}
+			if(xarray_key_exists('select', $args))
+				foreach($args['select'] as $selitem)
+				{
+					
+					$chain = $this->chain_field($selitem,$args['table'],$newargs);
+					
+				}
 						
 		//	var_dump($newargs);
 			return $newargs;

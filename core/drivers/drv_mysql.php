@@ -458,23 +458,35 @@ ON DELETE ".$bind_data['on_delete']." ON UPDATE ".$bind_data['on_update']."";
 	// get associative array of normalized fields
 	function make_select_str($selects,$_PREFIX='')
 	{
+		
+		if(count($selects)==0) return '*';
+		if($selects=='*') return '*';
 		$str_select="";
 		$i=0;
+		$_selects = Array();
 		foreach ($selects as $selkey => $selitem)
 		{
+			
 			if(is_string($selitem))
+			{
 				$str_select = $str_select.", $selitem";
+			}
 			else
 			{
-	
-				if($i)
-					$str_select = $str_select.", $_PREFIX{$selitem['table']}.{$selitem['fld']} as $selkey";
+				if($selitem['fld']=='*')
+				{
+					$_selects[] =  "$_PREFIX{$selitem['table']}.{$selitem['fld']}";
+				}
 				else
-					$str_select = $str_select."$_PREFIX{$selitem['table']}.{$selitem['fld']} as $selkey";
+				{
+					$_selects[] = "$_PREFIX{$selitem['table']}.{$selitem['fld']} as $selkey";
+				
+				}
+					
 			}
 			$i++;
 		}
-		return $str_select;
+		return implode(',',$_selects);
 	}
 	// join  t2 on t1.f1=t2.f2
 	function make_join_str($joins,&$select_params,$_PREFIX='')
@@ -501,10 +513,12 @@ ON DELETE ".$bind_data['on_delete']." ON UPDATE ".$bind_data['on_update']."";
 	
 	
 	// make where section
-	function makewhere($args,$_PREFIX)
+	function makewhere($wherestr,$_PREFIX)
 	{
-	$_WHERE=$args['where'];
-		$WHEREBUF=$args['WHEREBUF'];
+	
+	// @@ - is prefix
+	$_WHERE = strtr($wherestr,Array('@@'=>$_PREFIX));
+	/*	$WHEREBUF=$args['WHEREBUF'];
 		if(count($WHEREBUF))
 		{
 		if($_WHERE==1)
@@ -550,7 +564,7 @@ ON DELETE ".$bind_data['on_delete']." ON UPDATE ".$bind_data['on_update']."";
 												
 			}
 		}
-		
+		*/
 	return $_WHERE;
 	}
 	// query select
@@ -584,9 +598,12 @@ ON DELETE ".$bind_data['on_delete']." ON UPDATE ".$bind_data['on_update']."";
 			$_limit = "$l1,".$select_params['limit']['size'];
 		}
 		
+	/*	echo "::>>";
+		var_dump($select_params);*/
+		
 		$sql = "SELECT ".$this->make_select_str($select_params['select'],$this->_PREFIX)." FROM ".$this->_PREFIX.$select_params['table']." ".
 				$this->make_join_str($select_params['joins'],$select_params,$this->_PREFIX)." WHERE ".
-				$this->makewhere($select_params,$this->_PREFIX)." ".$_limit ;
+				$this->makewhere($select_params['where'],$this->_PREFIX)." ".$_limit ;
 		$this->dbg(__LINE__,$sql);
 		return $sql;
 
@@ -598,7 +615,7 @@ ON DELETE ".$bind_data['on_delete']." ON UPDATE ".$bind_data['on_update']."";
 	{
 		if(empty($del_params['where']))
 			$del_params['where']=1;
-		$sql = "DELETE FROM `{$this->_PREFIX}{$del_params['table']}` WHERE ".$del_params['where'];
+		$sql = "DELETE FROM `{$this->_PREFIX}{$del_params['table']}` WHERE ".$this->makewhere($del_params['where'],$this->_PREFIX);
 		$this->dbg(__LINE__,$sql);
 		return $sql;
 	
@@ -658,6 +675,7 @@ ON DELETE ".$bind_data['on_delete']." ON UPDATE ".$bind_data['on_update']."";
 	{
 		$sql = "UPDATE {$this->_PREFIX}{$upd_data['table']} SET ";
 		$i = 0;
+		$colcount=0;
 		foreach($upd_data['data'] as $col => $val)
 		{
 			if(($col[0]=='/')||($col[0]=='\\')) // virtual field
@@ -676,8 +694,10 @@ ON DELETE ".$bind_data['on_delete']." ON UPDATE ".$bind_data['on_update']."";
 			else 
 				$sql .= $newelement;
 			$i++;
+			$colcount++;
 		}
-		$sql = $sql." WHERE {$upd_data['where']}";
+		if($colcount==0) return FALSE;
+		$sql = $sql." WHERE ".$this->makewhere($upd_data['where'], $this->_PREFIX) ;
 		$this->dbg(__LINE__,$sql);
 		return  $sql;
 	}

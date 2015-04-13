@@ -119,7 +119,7 @@ while($row=$mydb->scheme->res_row($res))
 			))->exe();
 	
 	*/
-	$res = $mydb->scheme->update('article',Array('/ml:atext[en]'=>'Sdd err iop'))->where("autor=1")->exe();
+	$res = $mydb->scheme->update('article',Array('/ml:atext[en]'=>'Sdd err iop','/ml:atext[ru]'=>'Öóöóöóöó'))->where("autor=1")->exe();
 
 	
 	/*
