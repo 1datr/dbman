@@ -52,6 +52,17 @@ $mydb->scheme->add('project',Array(
 		//'fld1'=>'varchar',
 		'date'=>'datetime',
 ));
+$mydb->scheme->add('car',Array(
+		'model'=>'text',
+		'year'=>'bigint',
+		'distance'=>'bigint',
+		'#defdata'=>Array(
+			Array('model'=>'Audi','year'=>2006,'distance'=>1250),
+			Array('model'=>'BMW','year'=>2006,'distance'=>1230),
+			Array('model'=>'Isuzu','year'=>2007,'distance'=>1350),
+			Array('model'=>'Subaru','year'=>2008,'distance'=>2350),
+		)
+));
 /*
 $mydb->scheme->add('mail',Array(
 		'topic'=>'text',

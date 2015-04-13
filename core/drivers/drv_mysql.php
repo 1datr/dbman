@@ -486,7 +486,9 @@ ON DELETE ".$bind_data['on_delete']." ON UPDATE ".$bind_data['on_update']."";
 			}
 			$i++;
 		}
-		return implode(',',$_selects);
+		$_str = implode(',',$_selects);
+		$_str = strtr($_str,Array('@@'=>$this->_PREFIX));
+		return $_str;
 	}
 	// join  t2 on t1.f1=t2.f2
 	function make_join_str($joins,&$select_params,$_PREFIX='')
@@ -602,8 +604,9 @@ ON DELETE ".$bind_data['on_delete']." ON UPDATE ".$bind_data['on_update']."";
 		var_dump($select_params);*/
 		
 		$sql = "SELECT ".$this->make_select_str($select_params['select'],$this->_PREFIX)." FROM ".$this->_PREFIX.$select_params['table']." ".
-				$this->make_join_str($select_params['joins'],$select_params,$this->_PREFIX)." WHERE ".
-				$this->makewhere($select_params['where'],$this->_PREFIX)." ".
+				$this->make_join_str($select_params['joins'],$select_params,$this->_PREFIX)." ".
+				" WHERE ".$this->makewhere($select_params['where'],$this->_PREFIX)." ".
+				$this->make_group($select_params['group']).
 				$this->make_order($select_params['order'])." ".
 				$_limit ;
 		$this->dbg(__LINE__,$sql);
@@ -619,7 +622,8 @@ ON DELETE ".$bind_data['on_delete']." ON UPDATE ".$bind_data['on_update']."";
 	
 	function make_group($groups)
 	{
-		
+		if(count($groups)==0) return "";
+		return "GROUP BY ".ximplode(',',$groups,"{0}",Array('@@'=>$this->_PREFIX));
 	}
 	
 	function make_having($groups)

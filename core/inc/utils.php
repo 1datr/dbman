@@ -15,6 +15,7 @@ function ximplode($delimeter,$hasharray,$template,$_array=Null)
 	{
 		$tpl=Array();
 		$tpl["{idx}"]=$idx;
+		$tpl["{0}"]=$val;
 		foreach($val as $key => $v)
 		{
 			$tpl["{".$key."}"]=$v;

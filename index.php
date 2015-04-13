@@ -119,9 +119,13 @@ while($row=$mydb->scheme->res_row($res))
 			))->exe();
 	
 	*/
-	$res = $mydb->scheme->update('article',Array('/ml:atext[en]'=>'Sdd err iop','/ml:atext[ru]'=>'Öóöóöóöó'))->where("autor=1")->exe();
+	//$res = $mydb->scheme->update('article',Array('/ml:atext[en]'=>'Sdd err iop','/ml:atext[ru]'=>'Öóöóöóöó'))->where("autor=1")->exe();
 
-	
+	$res=$mydb->scheme->select('car',Array('$count(*)','year'))->group('year')->exe();
+	while($row=$mydb->scheme->res_row($res))
+	{
+		var_dump($row);
+	}
 	/*
 	$res = $mydb->scheme->update('user',Array('password'=>'123456'))->where("password=''")->exe();
 

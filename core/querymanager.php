@@ -341,18 +341,25 @@ class QMan
 		$this->_SELECT_ARGS['table']=$table;
 		$this->_SELECT_ARGS['select']=$selparams;
 		$this->_SELECT_ARGS['joins']=Array();
-		$this->_SELECT_ARGS['groupby']=Array();
+		$this->_SELECT_ARGS['group']=Array();
 		$this->_SELECT_ARGS['having']=Array();
 		$this->_SELECT_ARGS['order']=Array();
 		//$this->_SELECT_ARGS['scheme']=&$this->_SCHEME;
 		return $this;
 	}
-	
+	// group
+	function group($fld)
+	{
+		$this->_SELECT_ARGS['group'][]=$fld;
+		return $this;
+	}
+	// order asc
 	function order($fld)
 	{
 		$this->_SELECT_ARGS['order'][]=Array('fld'=>$fld,'dir'=>'ASC');
 		return $this;
 	}
+	// order desc
 	function order_d($fld)
 	{
 		$this->_SELECT_ARGS['order'][]=Array('fld'=>$fld,'dir'=>'DESC');
@@ -482,13 +489,7 @@ class QMan
 		$prepr->setscheme($this->_SCHEME);
 		$prepr->preprocess_addjoin($joinarg,$this->_SELECT_ARGS);
 	}
-	// add group argument
-	function group($group_arg)
-	{
-		if(empty($this->_SELECT_ARGS['group']))
-			$this->_SELECT_ARGS['group']=Array();
-				$this->_SELECT_ARGS['group'][]=$group_arg;
-	}
+	
 	
 	// exe sql query
 	function exe_sql($query,$exept=true)
