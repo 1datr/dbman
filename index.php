@@ -115,11 +115,11 @@ while($row=$mydb->scheme->res_row($res))
 			'autor'=>$mydb->scheme->select('user',Array('id','name'))->where("login='root'")->exeq()->getfield(0,'id'),
 			'date'=>'@NOW()',
 			'/ml:atext[en]'=>'Assw \n\r tyyoo',
-			'/ml:atext[ru]'=>'Ð–ÑÑÑ ÐºÐµÐµÐµ',
+			'/ml:atext[ru]'=>'Äææææ',
 			))->exe();
-	
 	*/
-	//$res = $mydb->scheme->update('article',Array('/ml:atext[en]'=>'Sdd err iop','/ml:atext[ru]'=>'Öóöóöóöó'))->where("autor=1")->exe();
+	
+	$res = $mydb->scheme->update('article',Array('/ml:atext[en]'=>'Sdd err iop','/ml:atext[ru]'=>'Öóöóöóöó'))->where("autor=1")->exe();
 
 	$res=$mydb->scheme->select('car',Array('$count(*)','year'))->group('year')->exe();
 	while($row=$mydb->scheme->res_row($res))

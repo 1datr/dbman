@@ -4,42 +4,28 @@ class DBMExtMultilang extends DBMExtention{
 	// event before adding new table
 	function on_before_add_table($args)
 	{
-		
-		foreach ($args['fields'] as $fld => $fldinfo)
+		/*
+		 *   $args['scheme']
+		 * */
+		foreach ($args['fields'] as $fld => &$fldinfo)
 		{
 			$matches = Array();
 			if(preg_match_all("|[\\/]{0,1}ml\:(.+)|",$fld,$matches))
 			{				
+			//	var_dump($matches);
 				$own_fld_name=$matches[1][0];
-				// add languages table if not exists
-				if(!$args['scheme']->obj_exist('language'))
+
+				// add fields for all languages
+				global $_LANGS;
+				foreach($_LANGS as $lang => $linfo)
 				{
-					$args['scheme']->add('language',Array(
-							'short'=>'text',
-							'full'=>'text',
-							'#defdata'=>Array(
-								Array('short'=>'ru','full'=>'Р СѓСЃСЃРєРёР№'),
-								Array('short'=>'en','full'=>'English'),
-									)
-					)
-					);
-				}
-				// add translation table if not exists
-				$mltable_name = $args['table']."_".$own_fld_name."";
-				if(!$args['scheme']->obj_exist($mltable_name))
-				{
-					$args['scheme']->add($mltable_name,Array(
-							'recid'=>"#".$args['table'].".id",
-							'lang'=>'#language.id',
-							'text'=>$fldinfo,
-						)
-					);
+					$args['fields'][$own_fld_name."_".$lang]=$fldinfo;
 				}
 				
-				if(is_string($args['fields'][$fld])) 
-					$args['fields'][$fld]="/".$args['fields'][$fld];
-				elseif(is_array($args['fields'][$fld]))
-					$args['fields'][$fld]['virtual']=true;
+				if(is_string($fldinfo))
+					$fldinfo = "/$fldinfo";
+				else 
+					$fldinfo['virtual']=true;
 			}
 		}
 	}
@@ -75,25 +61,12 @@ class DBMExtMultilang extends DBMExtention{
 			$matches = Array();
 			// \ml:field
 			if(preg_match_all("|[\\/]{0,1}ml\:(.+)\[(.+)\]|",$val,$matches))
-			{
-				//	var_dump($matches);
-				
-					$fldname = $matches[1][0];
-					$tblname = $args['args']['table']."_$fldname";
-					// delete the field
-					$args['scheme']->join(Array(
-							'from'=>Array('table'=>$args['args']['table'], 'field'=>'id'),
-							'to'=>Array('table'=>$tblname, 'field'=>'recid')
-					)
-					);
-					$args['scheme']->join(Array(
-							'from'=>Array('table'=>$tblname, 'field'=>'lang'),
-							'to'=>Array('table'=>'language', 'field'=>'id')
-					)
-					);
-					$args['scheme']->op(Array('table'=>'language','field'=>'short'),$matches[2][0],'=');
+			{				
+					$fldname = $matches[1][0];		
+					$lang = $matches[2][0];
+
 					unset($args['scheme']->_SELECT_ARGS['select'][$idx]);
-					$args['scheme']->_SELECT_ARGS['select'][]='$'.$args['scheme']->_DRV->_PREFIX."$tblname.text";
+					$args['scheme']->_SELECT_ARGS['select'][]=$fldname."_".$lang;
 					// delete the field
 					unset($args['args']['select'][$idx]);
 			}				
@@ -101,21 +74,9 @@ class DBMExtMultilang extends DBMExtention{
 			elseif(preg_match_all("|[\\/]{0,1}ml\:(.+)|",$val,$matches))
 			{
 				$fldname = $matches[1][0];
-				$tblname = $args['args']['table']."_$fldname";
-				// delete the field
-				$args['scheme']->join(Array(
-						'from'=>Array('table'=>$args['args']['table'], 'field'=>'id'),
-						'to'=>Array('table'=>$tblname, 'field'=>'recid')
-				)
-				);
-				$args['scheme']->join(Array(
-						'from'=>Array('table'=>$tblname, 'field'=>'lang'),
-						'to'=>Array('table'=>'language', 'field'=>'id')
-				)
-				);
-				$args['scheme']->op(Array('table'=>'language','field'=>'short'),$_CURR_LANGUAGE,'=');
+				
 				unset($args['scheme']->_SELECT_ARGS['select'][$idx]);
-				$args['scheme']->_SELECT_ARGS['select'][]='$'.$args['scheme']->_DRV->_PREFIX."$tblname.text";
+				$args['scheme']->_SELECT_ARGS['select'][]=$fldname."_".$_CURR_LANGUAGE;
 			}
 		}
 	}
@@ -150,7 +111,7 @@ class DBMExtMultilang extends DBMExtention{
 	VAR $_LANG=Array();
 	function make_lang_table($args)
 	{
-		//$this->_LANG = Array();
+	/*	//$this->_LANG = Array();
 		if(count($this->_LANG)) return ;
 		$_args = $args['scheme']->get_current_args(); // get the current args
 		$_res = $args['scheme']->select('language',Array('id','short'))->exe();
@@ -160,80 +121,18 @@ class DBMExtMultilang extends DBMExtention{
 			$this->_LANG[$row['short']]=$row['id'];
 		}
 		$args['scheme']->set_args($_args); // set the saved args
+		*/
 	}
 	
 	// after update 
 	function aq_on_update($args)
 	{
-		$this->make_lang_table($args);
-		 //var_dump($row);
-		$id=$row['id'];
-		foreach ($this->_UPDATED_ROWS as $_updrow)
-		{		
-			foreach($args['scheme']->_UPDATE_ARGS['data'] as $key => $val)
-			{
-				$matches = Array();
-				// \ml:field
-				if(preg_match_all("|[\\/]{0,1}ml\:(.+)\[(.+)\]|",$key,$matches))
-				{					
-					$fldname = $matches[1][0];
-					$lang_descriptor = $matches[2][0];
-					$tblname = $args['scheme']->_UPDATE_ARGS['table']."_$fldname";
-						
-					$_args = $args['scheme']->get_current_args(); // get the current args
-					
-					$lang_id = $this->_LANG[$lang_descriptor];
-					
-					$_res = $args['scheme']->select($tblname,Array('*'))
-->where("@@$tblname.recid={$_updrow['id']} AND @@$tblname.lang=$lang_id")
-/*
-->op(Array('table'=>$tblname,'field'=>'recid'),$_updrow['id'],'=')				
-->op(Array('table'=>$tblname,'field'=>'lang'),$lang_id,'=')	*/				
-->exe();
-					if($args['scheme']->result_count($_res))
-					{
-						$args['scheme']->update($tblname,Array('text'=>$val))
-->where("@@$tblname.recid={$_updrow['id']} AND @@$tblname.lang=$lang_id")
-/*->op(Array('table'=>$tblname,'field'=>'recid'),$_updrow['id'],'=')				
-->op(Array('table'=>$tblname,'field'=>'lang'),$lang_id,'=')*/
-->exe();
-					}
-					else 
-					{
-						$args['scheme']->insert($tblname,Array(
-								'recid'=>$args['qresult'][$idx],
-								'lang'=>$lang_id,
-								'text'=>$val,
-						)
-						)->exe();
-					}
-					
-					//
-					$args['scheme']->set_args($_args); // set the saved args
-					
-				//unset($args['args']['select'][$idx]);
-				}
-				// \ml:field[ru]
-				elseif(preg_match_all("|[\\/]{0,1}ml\:(.+)|",$key,$matches))
-				{
-					$fldname = $matches[1][0];
-					$lang_descriptor = $matches[2][0];
-					$tblname = $args['scheme']->_UPDATE_ARGS['table']."_$fldname";
-						
-					$args['scheme']->insert($tblname,Array(
-							'recid'=>$args['qresult'][$idx],
-							'lang'=>$args['scheme']->select('language',Array('id'))->where("short='$_CURR_LANGUAGE'")->exeq()->getfield(0,'id'),
-							'text'=>$val,
-					)
-					)->exe();
-					}
-			}
-		}
+		
 	}
 	// after add query
 	function aq_on_add($args)
 	{
-		global $_CURR_LANGUAGE;
+/*		global $_CURR_LANGUAGE;
 		$this->make_lang_table($args);
 		foreach($args['scheme']->_ADD_ARGS['data'] as $idx => $arr)
 		{
@@ -276,7 +175,7 @@ class DBMExtMultilang extends DBMExtention{
 					)->exe();
 				}
 			}
-		}
+		}*/
 	}
 	// on delete item
 	function aq_on_delitem($args)
@@ -288,47 +187,91 @@ class DBMExtMultilang extends DBMExtention{
 	
 	function on_update(&$args)
 	{
-		// Запоминаем данные которые будут изменены
-		global $_CURR_LANGUAGE;
-		$_args = $args['scheme']->get_current_args(); // get the current args
-		$_res = $args['scheme']->select($_args['_UPDATE_ARGS']['table'],'*'
-				//'user|id<groupmember:group',
-				)->where($_args['_UPDATE_ARGS']['where'])->exe(
-						//'q1'
-				);
-		$args['scheme']->set_args($_args); // set the saved args
-		$this->_UPDATED_ROWS=Array();
-		while($row=$args['scheme']->res_row($_res))
-			{
-				$this->_UPDATED_ROWS[]=$row;
+		global $_LANGS;
+		foreach ($args['scheme']->_UPDATE_ARGS['data'] as $key => $val)
+			{		
+					$matches = Array();
+					// \ml:field
+					if(preg_match_all("|[\\/]{0,1}ml\:(.+)\[(.+)\]|",$key,$matches))
+					{					
+						$fldname = $matches[1][0];
+						$lang_descriptor = $matches[2][0];
+						if($lang_descriptor=="all")
+						{
+							foreach ($_LANGS as $lng => $linfo)
+							{
+								$thefield = $fldname."_".$lng;
+								$args['scheme']->_UPDATE_ARGS['data'][$thefield]=$val;
+							}
+						}
+						elseif(!empty($_LANGS[$lang_descriptor]))
+						{						
+							$thefield = $fldname."_".$lang_descriptor;
+							$args['scheme']->_UPDATE_ARGS['data'][$thefield]=$val;
+						}	
+					//
+					}
+					// \ml:field[ru]
+					elseif(preg_match_all("|[\\/]{0,1}ml\:(.+)|",$key,$matches))
+					{
+						$fldname = $matches[1][0];
+						$thefield = $fldname."_".$_CURR_LANGUAGE;
+						$args['scheme']->_UPDATE_ARGS['data'][$thefield]=$val;
+							
+					}
 			}
 	}
 	
 	function on_add(&$args)
 	{
 		global $_CURR_LANGUAGE;
-		foreach($args['args'] as $idx => $val)
+		global $_LANGS;
+		foreach($args['scheme']->_ADD_ARGS['data'] as $idx => $row)			
 		{
-				
+			foreach($row as $key => $val)
+			{
+				$matches = Array();
+				// \ml:field
+				if(preg_match_all("|[\\/]{0,1}ml\:(.+)\[(.+)\]|",$key,$matches))
+				{					
+					$fldname = $matches[1][0];
+					$lang_descriptor = $matches[2][0];
+					if($lang_descriptor=="all")
+					{
+						foreach ($_LANGS as $lng => $linfo)
+						{
+							$thefield = $fldname."_".$lng;
+							$args['scheme']->_ADD_ARGS['data'][$idx][$thefield]=$val;
+						}
+					}
+					elseif(!empty($_LANGS[$lang_descriptor]))
+					{
+						$thefield = $fldname."_".$lang_descriptor;
+						$args['scheme']->_ADD_ARGS['data'][$idx][$thefield]=$val;
+					}
+					//
+				}
+				// \ml:field[ru]
+				elseif(preg_match_all("|[\\/]{0,1}ml\:(.+)|",$key,$matches))
+				{
+					$fldname = $matches[1][0];
+					$thefield = $fldname."_".$_CURR_LANGUAGE;
+					$args['scheme']->_ADD_ARGS['data'][$idx][$thefield]=$val;
+						
+				}	
+			}
 		}
+		//var_dump($args['scheme']->_ADD_ARGS);
 	}
 	
 	function on_delete(&$args)
 	{
-		global $_CURR_LANGUAGE;
-		foreach($args['args'] as $idx => $val)
-		{
-				
-		}
+
 	}
 	
 	function on_delitem(&$args)
 	{
-		global $_CURR_LANGUAGE;
-		foreach($args['args'] as $idx => $val)
-		{
-				
-		}
+		
 	}	
 }
 ?>

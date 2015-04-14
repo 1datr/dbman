@@ -7,4 +7,5 @@ $connection=Array(
 		'prefix'=>'tdb_'
 );
 $_CURR_LANGUAGE='en';
+$_LANGS=Array('en'=>'English','ru'=>'Русский');
 ?>
