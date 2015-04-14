@@ -627,6 +627,7 @@ ON DELETE ".$bind_data['on_delete']." ON UPDATE ".$bind_data['on_update']."";
 	{
 		if(count($select_params['group'])==0) return "";
 		if($select_params['having']=="") return "";
+		$select_params['having'] = strtr($select_params['having'],Array('@@'=>$this->_PREFIX));
 		return "HAVING ".$select_params['having'];
 	}
 	
