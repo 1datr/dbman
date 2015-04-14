@@ -111,17 +111,7 @@ class DBMExtMultilang extends DBMExtention{
 	VAR $_LANG=Array();
 	function make_lang_table($args)
 	{
-	/*	//$this->_LANG = Array();
-		if(count($this->_LANG)) return ;
-		$_args = $args['scheme']->get_current_args(); // get the current args
-		$_res = $args['scheme']->select('language',Array('id','short'))->exe();
-		while($row = $args['scheme']->res_row($_res))
-		{
-			//var_dump($row);
-			$this->_LANG[$row['short']]=$row['id'];
-		}
-		$args['scheme']->set_args($_args); // set the saved args
-		*/
+	
 	}
 	
 	// after update 
@@ -132,50 +122,7 @@ class DBMExtMultilang extends DBMExtention{
 	// after add query
 	function aq_on_add($args)
 	{
-/*		global $_CURR_LANGUAGE;
-		$this->make_lang_table($args);
-		foreach($args['scheme']->_ADD_ARGS['data'] as $idx => $arr)
-		{
-			foreach ($arr as $key => $val)
-			{
-				$matches = Array();
-				// \ml:field
-				if(preg_match_all("|[\\/]{0,1}ml\:(.+)\[(.+)\]|",$key,$matches))
-				{
-					//	var_dump($matches);
-			
-					$fldname = $matches[1][0];
-					$lang_descriptor = $matches[2][0];
-					$tblname = $args['scheme']->_ADD_ARGS['table']."_$fldname";
-					
-					$_args = $args['scheme']->get_current_args(); // get the current args
-					$args['scheme']->insert($tblname,Array(
-								'recid'=>$args['qresult'][$idx],
-								'lang'=>$this->_LANG[$lang_descriptor],
-								'text'=>$val,
-								)
-							)->exe();
-					//
-					$args['scheme']->set_args($_args); // set the saved args
-					
-					//unset($args['args']['select'][$idx]);
-				}
-				// \ml:field[ru]
-				elseif(preg_match_all("|[\\/]{0,1}ml\:(.+)|",$key,$matches))
-				{
-					$fldname = $matches[1][0];
-					$lang_descriptor = $matches[2][0];
-					$tblname = $args['scheme']->_ADD_ARGS['table']."_$fldname";
-						
-					$args['scheme']->insert($tblname,Array(
-							'recid'=>$args['qresult'][$idx],
-							'lang'=>$this->_LANG[$_CURR_LANGUAGE],
-							'text'=>$val,
-					)
-					)->exe();
-				}
-			}
-		}*/
+
 	}
 	// on delete item
 	function aq_on_delitem($args)
