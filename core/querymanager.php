@@ -342,7 +342,7 @@ class QMan
 		$this->_SELECT_ARGS['select']=$selparams;
 		$this->_SELECT_ARGS['joins']=Array();
 		$this->_SELECT_ARGS['group']=Array();
-		$this->_SELECT_ARGS['having']=Array();
+		$this->_SELECT_ARGS['having']='';
 		$this->_SELECT_ARGS['order']=Array();
 		//$this->_SELECT_ARGS['scheme']=&$this->_SCHEME;
 		return $this;
@@ -352,6 +352,10 @@ class QMan
 	{
 		$this->_SELECT_ARGS['group'][]=$fld;
 		return $this;
+	}
+	function having($_having)
+	{
+		$this->_SELECT_ARGS['having']=$_having;
 	}
 	// order asc
 	function order($fld)

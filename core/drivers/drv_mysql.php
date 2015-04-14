@@ -614,12 +614,20 @@ ON DELETE ".$bind_data['on_delete']." ON UPDATE ".$bind_data['on_update']."";
 		$sql = "SELECT ".$this->make_select_str($select_params['select'],$this->_PREFIX)." FROM ".$this->_PREFIX.$select_params['table']." ".
 				$this->make_join_str($select_params['joins'],$select_params,$this->_PREFIX)." ".
 				" WHERE ".$this->makewhere($select_params['where'],$this->_PREFIX)." ".
-				$this->make_group($select_params['group']).
+				$this->make_group($select_params['group'])." ".
+				$this->make_having($select_params)." ".
 				$this->make_order($select_params['order'])." ".
 				$_limit ;
 		$this->dbg(__LINE__,$sql);
 		return $sql;
 
+	}
+	
+	function make_having($select_params)
+	{
+		if(count($select_params['group'])==0) return "";
+		if($select_params['having']=="") return "";
+		return "HAVING ".$select_params['having'];
 	}
 	
 	function make_order($orders)
@@ -634,11 +642,7 @@ ON DELETE ".$bind_data['on_delete']." ON UPDATE ".$bind_data['on_update']."";
 		return "GROUP BY ".ximplode(',',$groups,"{0}",Array('@@'=>$this->_PREFIX));
 	}
 	
-	function make_having($groups)
-	{
-	
-	}
-	
+		
 	// query delete
 	function q_delete($del_params)
 	{
